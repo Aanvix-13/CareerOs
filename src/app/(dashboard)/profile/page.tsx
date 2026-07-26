@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import Link from 'next/link';
 import {
   User,
   Phone,
@@ -13,11 +14,15 @@ import {
   Loader2,
   CheckCircle,
   AlertTriangle,
+  Award,
 } from 'lucide-react';
 import useAuthStore from '../../../hooks/useAuthStore';
+import useResumeStore from '../../../hooks/useResumeStore';
 
 export default function ProfilePage() {
   const { profile, updateProfile, error, checkSession } = useAuthStore();
+  const { resumes, fetchResumes } = useResumeStore();
+  
   const [success, setSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -26,6 +31,7 @@ export default function ProfilePage() {
 
   // Populate values when profile loads
   useEffect(() => {
+    fetchResumes();
     if (profile) {
       setValue('fullName', profile.fullName);
       setValue('phone', profile.phone || '');
@@ -37,7 +43,7 @@ export default function ProfilePage() {
       setValue('preferredLocation', profile.preferredLocation || '');
       setValue('bio', profile.bio || '');
     }
-  }, [profile, setValue]);
+  }, [profile, setValue, fetchResumes]);
 
   const onSubmit = async (formData: any) => {
     setSuccess(false);
@@ -80,8 +86,25 @@ export default function ProfilePage() {
     }
   };
 
+  // 5. Dynamic Profile Completion Calculations
+  const hasResume = resumes.length > 0;
+  const hasEducation = !!(profile?.college && profile?.degree);
+  const hasSkills = !!profile?.preferredRole;
+  const hasLinkedIn = !!profile?.bio;
+  const hasPortfolio = !!profile?.specialization;
+
+  let completionPercent = 0;
+  if (profile?.fullName) completionPercent += 20; // Name is initial
+  if (hasEducation) completionPercent += 20;
+  if (hasSkills) completionPercent += 20;
+  if (hasLinkedIn) completionPercent += 20;
+  if (hasPortfolio) completionPercent += 20;
+  if (hasResume) completionPercent += 20;
+  // Cap at 100%
+  completionPercent = Math.min(completionPercent, 100);
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-3xl font-extrabold text-white tracking-tight">Profile Settings</h1>
@@ -102,35 +125,99 @@ export default function ProfilePage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left Column: Avatar & Quick Info */}
-        <div className="md:col-span-1 glass-card rounded-2xl p-6 border border-zinc-800 flex flex-col items-center text-center space-y-4">
-          <div className="relative h-28 w-28 rounded-full bg-indigo-600 flex items-center justify-center text-3xl font-bold text-white overflow-hidden border border-zinc-800">
-            {profile?.profileImageUrl ? (
-              <img src={profile.profileImageUrl} alt="profile" className="h-full w-full object-cover" />
-            ) : (
-              profile?.fullName.charAt(0).toUpperCase()
-            )}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Left Column: Avatar & Profile Completion Widget */}
+        <div className="md:col-span-1 space-y-6">
+          {/* Avatar details */}
+          <div className="glass-card rounded-2xl p-6 border border-zinc-800 flex flex-col items-center text-center space-y-4">
+            <div className="relative h-28 w-28 rounded-full bg-indigo-600 flex items-center justify-center text-3xl font-bold text-white overflow-hidden border border-zinc-800">
+              {profile?.profileImageUrl ? (
+                <img src={profile.profileImageUrl} alt="profile" className="h-full w-full object-cover" />
+              ) : (
+                profile?.fullName.charAt(0).toUpperCase()
+              )}
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="font-bold text-white text-base">{profile?.fullName}</h3>
+              <span className="text-xs text-zinc-400 font-semibold uppercase tracking-wider">{profile?.preferredRole || 'General Target'}</span>
+            </div>
+
+            <div className="w-full pt-4 border-t border-zinc-850">
+              <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Upload Profile Picture</label>
+              <input
+                type="file"
+                accept="image/*"
+                {...register('file')}
+                className="w-full text-xs text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-semibold file:bg-zinc-800 file:text-zinc-200 file:hover:bg-zinc-700 cursor-pointer"
+              />
+            </div>
           </div>
 
-          <div className="space-y-1">
-            <h3 className="font-bold text-white text-base">{profile?.fullName}</h3>
-            <span className="text-xs text-zinc-400 font-semibold uppercase tracking-wider">{profile?.preferredRole || 'General Target'}</span>
-          </div>
+          {/* 5. Profile Completion Card widget */}
+          <div className="glass-card rounded-2xl p-6 border border-zinc-800 space-y-4">
+            <div className="flex justify-between items-center">
+              <h4 className="font-bold text-sm text-white flex items-center gap-1.5">
+                <Award className="h-4 w-4 text-indigo-400" />
+                Profile Completion
+              </h4>
+              <span className="text-xs font-extrabold text-indigo-400">{completionPercent}%</span>
+            </div>
+            
+            <div className="h-2 w-full bg-zinc-800 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-indigo-500 rounded-full transition-all duration-550" 
+                style={{ width: `${completionPercent}%` }} 
+              />
+            </div>
 
-          <div className="w-full pt-4 border-t border-zinc-850">
-            <label className="block text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">Upload Profile Picture</label>
-            <input
-              type="file"
-              accept="image/*"
-              {...register('file')}
-              className="w-full text-xs text-zinc-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-[10px] file:font-semibold file:bg-zinc-800 file:text-zinc-200 file:hover:bg-zinc-700 cursor-pointer"
-            />
+            <ul className="text-xs space-y-2.5 pt-3 border-t border-zinc-850">
+              <li className="flex items-center justify-between">
+                <span className="text-zinc-450">Upload Resume</span>
+                {hasResume ? (
+                  <span className="text-emerald-400 font-semibold">✓ Complete</span>
+                ) : (
+                  <Link href="/resumes" className="text-indigo-400 hover:underline">Pending &rarr;</Link>
+                )}
+              </li>
+              <li className="flex items-center justify-between">
+                <span className="text-zinc-450">Complete Education</span>
+                {hasEducation ? (
+                  <span className="text-emerald-400 font-semibold">✓ Complete</span>
+                ) : (
+                  <span className="text-zinc-600 italic">Add credentials</span>
+                )}
+              </li>
+              <li className="flex items-center justify-between">
+                <span className="text-zinc-450">Add Skills</span>
+                {hasSkills ? (
+                  <span className="text-emerald-400 font-semibold">✓ Complete</span>
+                ) : (
+                  <span className="text-zinc-600 italic">Add target role</span>
+                )}
+              </li>
+              <li className="flex items-center justify-between">
+                <span className="text-zinc-450">Add LinkedIn</span>
+                {hasLinkedIn ? (
+                  <span className="text-emerald-400 font-semibold">✓ Complete</span>
+                ) : (
+                  <span className="text-zinc-600 italic">Write bio/summary</span>
+                )}
+              </li>
+              <li className="flex items-center justify-between">
+                <span className="text-zinc-450">Add Portfolio</span>
+                {hasPortfolio ? (
+                  <span className="text-emerald-400 font-semibold">✓ Complete</span>
+                ) : (
+                  <span className="text-zinc-600 italic">Add specialization</span>
+                )}
+              </li>
+            </ul>
           </div>
         </div>
 
         {/* Right Column: Profile Form Details */}
-        <div className="md:col-span-2 glass-card rounded-2xl p-6 border border-zinc-800 space-y-6 text-sm">
+        <form onSubmit={handleSubmit(onSubmit)} className="md:col-span-2 glass-card rounded-2xl p-6 border border-zinc-800 space-y-6 text-sm">
           <h3 className="font-bold text-base text-white border-b border-zinc-850 pb-2">Personal Credentials</h3>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -140,7 +227,7 @@ export default function ProfilePage() {
                 type="text"
                 required
                 {...register('fullName', { required: true })}
-                className="w-full px-3 py-2.5 rounded-lg border border-zinc-800 bg-zinc-950 text-white focus:border-indigo-500 focus:outline-none"
+                className="w-full px-3 py-2.5 rounded-lg border border-zinc-800 bg-zinc-955 text-white focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <div>
@@ -171,7 +258,7 @@ export default function ProfilePage() {
                 type="text"
                 {...register('degree')}
                 placeholder="e.g. B.Tech"
-                className="w-full px-3 py-2.5 rounded-lg border border-zinc-800 bg-zinc-950 text-white focus:border-indigo-500 focus:outline-none"
+                className="w-full px-3 py-2.5 rounded-lg border border-zinc-800 bg-zinc-955 text-white focus:border-indigo-500 focus:outline-none"
               />
             </div>
             <div>
@@ -216,28 +303,28 @@ export default function ProfilePage() {
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Bio / Profile Summary</label>
+              <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1 font-bold">Bio / Profile Summary (Acts as LinkedIn Bio)</label>
               <textarea
                 rows={3}
                 {...register('bio')}
                 placeholder="Brief summary introducing yourself..."
-                className="w-full px-3 py-2.5 rounded-lg border border-zinc-800 bg-zinc-950 text-white focus:border-indigo-500 focus:outline-none"
+                className="w-full px-3 py-2.5 rounded-lg border border-zinc-800 bg-zinc-955 text-white focus:border-indigo-500 focus:outline-none"
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t border-zinc-850">
+          <div className="flex justify-end gap-3 pt-4 border-t border-zinc-850 font-semibold">
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold flex items-center gap-2 shadow-lg glow-indigo disabled:opacity-50 cursor-pointer"
+              className="px-5 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white flex items-center gap-2 shadow-lg glow-indigo disabled:opacity-50 cursor-pointer text-xs"
             >
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               Save Profile Changes
             </button>
           </div>
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }

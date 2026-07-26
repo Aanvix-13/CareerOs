@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   FileText,
@@ -13,6 +13,8 @@ import {
   X,
   FileUp,
   Download,
+  Eye,
+  Settings,
 } from 'lucide-react';
 import useResumeStore from '../../../hooks/useResumeStore';
 
@@ -23,34 +25,70 @@ export default function ResumesPage() {
   const [uploading, setUploading] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
-  const { register, handleSubmit, reset } = useForm();
+  // Drag and drop states
+  const [dragActive, setDragActive] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { register, handleSubmit, reset, setValue } = useForm();
 
   useEffect(() => {
     fetchResumes();
   }, [fetchResumes]);
 
-  const handleUploadSubmit = async (formData: any) => {
-    setLocalError(null);
-    const fileList = formData.file;
-    
-    if (!fileList || fileList.length === 0) {
-      setLocalError('Please select a PDF file.');
-      return;
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
     }
+  };
 
-    const file = fileList[0];
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    setLocalError(null);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      validateAndSetFile(file);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLocalError(null);
+    if (e.target.files && e.target.files[0]) {
+      validateAndSetFile(e.target.files[0]);
+    }
+  };
+
+  const validateAndSetFile = (file: File) => {
     if (file.type !== 'application/pdf') {
       setLocalError('Only PDF files are supported.');
       return;
     }
-
     if (file.size > 5 * 1024 * 1024) {
       setLocalError('File is too large. Max size is 5MB.');
       return;
     }
+    setSelectedFile(file);
+    // Autofill resume name field with file name (without extension)
+    const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+    setValue('name', nameWithoutExt);
+  };
+
+  const handleUploadSubmit = async (formData: any) => {
+    setLocalError(null);
+    if (!selectedFile) {
+      setLocalError('Please select or drag a PDF file first.');
+      return;
+    }
 
     const data = new FormData();
-    data.append('file', file);
+    data.append('file', selectedFile);
     data.append('name', formData.name);
     if (formData.targetRole) data.append('targetRole', formData.targetRole);
     if (formData.version) data.append('version', formData.version);
@@ -60,6 +98,7 @@ export default function ResumesPage() {
     try {
       await uploadResume(data);
       setIsUploadOpen(false);
+      setSelectedFile(null);
       reset();
       fetchResumes();
     } catch (err: any) {
@@ -86,7 +125,10 @@ export default function ResumesPage() {
     }
   };
 
-  // Human readable bytes
+  const handleRenameClick = () => {
+    alert('To rename a resume, please delete and upload a new file with your preferred name, or upload as a new version.');
+  };
+
   const formatBytes = (bytes: number) => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -96,7 +138,7 @@ export default function ResumesPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -120,64 +162,104 @@ export default function ResumesPage() {
         </div>
       )}
 
-      {/* Resumes Grid */}
+      {/* 2. Drag & Drop Upload Zone + Empty States */}
       {resumes.length === 0 ? (
-        <div className="glass-card rounded-2xl border border-dashed border-zinc-800 p-12 text-center max-w-lg mx-auto mt-8">
-          <FileUp className="h-12 w-12 text-zinc-600 mx-auto mb-3" />
-          <h3 className="font-bold text-white text-base">No resumes uploaded</h3>
-          <p className="text-zinc-400 text-xs mt-1 mb-6">
-            Upload your master resume to start mapping versions to applications.
-          </p>
-          <button
-            onClick={() => setIsUploadOpen(true)}
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-xs font-semibold text-white"
+        <div className="max-w-2xl mx-auto mt-8">
+          <div
+            onDragEnter={handleDrag}
+            onDragOver={handleDrag}
+            onDragLeave={handleDrag}
+            onDrop={handleDrop}
+            onClick={() => fileInputRef.current?.click()}
+            className={`glass-card rounded-2xl border-2 border-dashed p-12 text-center transition cursor-pointer flex flex-col items-center justify-center min-h-[300px] ${
+              dragActive ? 'border-indigo-500 bg-indigo-950/10' : 'border-zinc-800 hover:border-zinc-700'
+            }`}
           >
-            <Upload className="h-3 w-3" /> Upload PDF
-          </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="application/pdf"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            
+            <FileUp className="h-16 w-16 text-indigo-400 mb-4 animate-bounce" />
+            <h3 className="font-bold text-white text-lg">Upload Resume</h3>
+            <p className="text-zinc-400 text-sm mt-1 mb-2">
+              Drag & Drop PDF here, or <span className="text-indigo-400 underline font-semibold">Browse Files</span>
+            </p>
+            <p className="text-zinc-600 text-xs">
+              Accepted format: PDF (Max size: 5 MB)
+            </p>
+          </div>
+          
+          {selectedFile && (
+            <div className="mt-4 p-4 rounded-xl border border-zinc-800 bg-zinc-900/60 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FileText className="h-8 w-8 text-indigo-400" />
+                <div>
+                  <p className="text-sm font-bold text-white truncate max-w-xs">{selectedFile.name}</p>
+                  <p className="text-xs text-zinc-500">{formatBytes(selectedFile.size)}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsUploadOpen(true)}
+                className="text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg transition"
+              >
+                Complete Upload Info
+              </button>
+            </div>
+          )}
         </div>
       ) : (
+        /* Resumes Grid Card View with premium visual adjustments */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {resumes.map((resume) => (
             <div
               key={resume.id}
-              className={`glass-card rounded-2xl p-5 border flex flex-col justify-between h-56 transition-all duration-300 ${
+              className={`glass-card rounded-2xl p-5 border flex flex-col justify-between h-60 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${
                 resume.isDefault ? 'border-indigo-500/40 glow-indigo bg-indigo-950/5' : 'border-zinc-800 hover:border-zinc-700'
               }`}
             >
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className={`p-2 rounded-lg ${resume.isDefault ? 'bg-indigo-600/10 text-indigo-400' : 'bg-zinc-800 text-zinc-400'}`}>
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2.5 rounded-lg border ${resume.isDefault ? 'bg-indigo-600/10 text-indigo-400 border-indigo-500/20' : 'bg-zinc-800 text-zinc-400 border-zinc-700/60'}`}>
                       <FileText className="h-5 w-5" />
                     </div>
-                    <div>
-                      <h4 className="font-bold text-white text-sm truncate max-w-[150px]">{resume.name}</h4>
-                      {resume.version && <span className="text-[9px] text-zinc-500 font-semibold uppercase tracking-wider block">Ver: {resume.version}</span>}
+                    <div className="min-w-0">
+                      <h4 className="font-bold text-white text-sm truncate max-w-[150px]" title={resume.name}>{resume.name}</h4>
+                      {resume.version && <span className="text-[9px] text-zinc-500 font-semibold uppercase tracking-wider block mt-0.5">Version: {resume.version}</span>}
                     </div>
                   </div>
                   {resume.isDefault && (
-                    <span className="inline-flex items-center gap-1 rounded bg-indigo-500/10 px-2 py-0.5 text-[9px] font-semibold text-indigo-400 border border-indigo-500/20">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/10 px-2 py-0.5 text-[9px] font-semibold text-indigo-400 border border-indigo-500/20">
                       <CheckCircle className="h-3 w-3" /> Default
                     </span>
                   )}
                 </div>
 
-                <div className="text-xs text-zinc-400">
+                <div className="text-xs text-zinc-400 space-y-1.5 border-t border-zinc-800/40 pt-3">
                   <div className="flex items-center justify-between">
-                    <span>Role target:</span>
+                    <span>Role Target:</span>
                     <span className="font-medium text-zinc-200">{resume.targetRole || 'General'}</span>
                   </div>
-                  <div className="flex items-center justify-between mt-1">
-                    <span>File size:</span>
-                    <span className="font-medium text-zinc-300">{formatBytes(resume.fileSize)}</span>
+                  <div className="flex items-center justify-between">
+                    <span>File Size:</span>
+                    <span className="font-medium text-zinc-350">{formatBytes(resume.fileSize)}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Uploaded:</span>
+                    <span className="font-medium text-zinc-400">{new Date(resume.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
 
                 {resume.notes && (
-                  <p className="text-[10px] text-zinc-500 line-clamp-2 italic pt-1">{resume.notes}</p>
+                  <p className="text-[10px] text-zinc-500 line-clamp-1 italic">{resume.notes}</p>
                 )}
               </div>
 
+              {/* Actions Footer */}
               <div className="flex items-center justify-between border-t border-zinc-850 pt-3 mt-4 text-xs font-semibold">
                 <a
                   href={resume.fileUrl}
@@ -185,10 +267,17 @@ export default function ResumesPage() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-indigo-400 hover:text-indigo-300"
                 >
-                  <Download className="h-4 w-4" /> Download PDF
+                  <Eye className="h-4 w-4" /> Preview / View
                 </a>
 
                 <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleRenameClick}
+                    className="text-zinc-500 hover:text-zinc-300 transition"
+                  >
+                    Rename
+                  </button>
+                  
                   {!resume.isDefault && (
                     <button
                       onClick={() => handleSetDefault(resume.id)}
@@ -199,7 +288,7 @@ export default function ResumesPage() {
                   )}
                   <button
                     onClick={() => handleDelete(resume.id)}
-                    className="text-rose-500 hover:text-rose-400 hover:bg-rose-950/10 p-1.5 rounded-lg border border-transparent hover:border-rose-500/10 transition cursor-pointer"
+                    className="text-rose-500 hover:text-rose-400 hover:bg-rose-950/10 p-1 rounded transition cursor-pointer"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -210,7 +299,7 @@ export default function ResumesPage() {
         </div>
       )}
 
-      {/* UPLOAD RESUME MODAL */}
+      {/* UPLOAD RESUME MODAL (Also handles drag files details filler) */}
       {isUploadOpen && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-6 space-y-4">
@@ -235,7 +324,7 @@ export default function ResumesPage() {
                   type="text"
                   required
                   {...register('name', { required: true })}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-white focus:border-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-955 text-white focus:border-indigo-500 focus:outline-none"
                   placeholder="e.g. Master Resume 2026"
                 />
               </div>
@@ -263,13 +352,26 @@ export default function ResumesPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1 font-bold">Select PDF File (Max 5MB)</label>
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  required
-                  {...register('file', { required: true })}
-                  className="w-full text-xs text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-zinc-800 file:text-zinc-200 file:hover:bg-zinc-700 cursor-pointer"
-                />
+                {selectedFile ? (
+                  <div className="p-3 rounded-lg border border-zinc-800 bg-zinc-955 flex items-center justify-between text-xs">
+                    <span className="text-zinc-200 font-medium truncate max-w-[200px]">{selectedFile.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFile(null)}
+                      className="text-rose-400 hover:text-rose-300 font-bold"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    required
+                    onChange={handleFileChange}
+                    className="w-full text-xs text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-zinc-800 file:text-zinc-200 file:hover:bg-zinc-700 cursor-pointer"
+                  />
+                )}
               </div>
 
               <div>
