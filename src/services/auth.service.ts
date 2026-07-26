@@ -10,6 +10,12 @@ export class AuthService {
     password: string,
     fullName: string
   ): Promise<{ user: User; profile: Profile }> {
+    // Check if email already exists in our local database first
+    const existingUser = await userRepository.findByEmail(email);
+    if (existingUser) {
+      throw new ConflictError('Email already exists.');
+    }
+
     const supabase = await createSupabaseServerClient();
 
     // 1. Sign up user in Supabase Auth
