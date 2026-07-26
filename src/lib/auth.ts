@@ -37,8 +37,8 @@ export async function getCurrentUser(request: Request): Promise<TokenPayload> {
     {
       cookies: {
         getAll() {
-          const { parse } = require('cookie');
-          const cookies = parse(cookieHeader);
+          const { parseCookie } = require('cookie');
+          const cookies = parseCookie(cookieHeader);
           return Object.entries(cookies).map(([name, value]) => ({ name, value: value as string }));
         },
         setAll() {
