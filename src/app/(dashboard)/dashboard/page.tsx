@@ -14,16 +14,22 @@ import {
   AlertTriangle,
   MapPin,
   TrendingUp,
+  FileText,
+  Bell,
+  ArrowRight,
 } from 'lucide-react';
 import apiClient from '../../../lib/api-client';
 import useReminderStore from '../../../hooks/useReminderStore';
+import useAuthStore from '../../../hooks/useAuthStore';
 
 export default function DashboardPage() {
   const { completeReminder } = useReminderStore();
+  const { profile, user: authUser } = useAuthStore();
 
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const [greeting, setGreeting] = useState('Welcome');
 
   const fetchDashboard = async () => {
     try {
@@ -39,12 +45,17 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchDashboard();
+
+    // Dynamically calculate greeting based on local time
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting('Good Morning');
+    else if (hour < 18) setGreeting('Good Afternoon');
+    else setGreeting('Good Evening');
   }, []);
 
   const handleCompleteReminder = async (id: string) => {
     try {
       await completeReminder(id);
-      // Reload dashboard state to update checklists
       fetchDashboard();
     } catch (err) {
       // Ignored
@@ -64,7 +75,7 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-6 text-center max-w-lg mx-auto mt-12">
+      <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-6 text-center max-w-lg mx-auto mt-12 animate-fade-in">
         <AlertTriangle className="h-10 w-10 text-rose-500 mx-auto mb-3" />
         <h3 className="font-semibold text-white mb-1">Failed to load data</h3>
         <p className="text-zinc-400 text-sm mb-4">{error}</p>
@@ -99,94 +110,178 @@ export default function DashboardPage() {
     { key: 'OfferReceived', label: 'Offer', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 glow-emerald' },
   ];
 
+  const userName = profile?.fullName || authUser?.email?.split('@')[0] || 'User';
+
+  // Calculate Today's Progress Stats
+  const todayStr = new Date().toISOString().split('T')[0];
+  const appsToday = recentApplications.filter((app: any) => {
+    const appDate = new Date(app.applicationDate).toISOString().split('T')[0];
+    return appDate === todayStr;
+  }).length;
+
+  const appsGoal = 5;
+  const progressPercent = Math.min((appsToday / appsGoal) * 100, 100);
+
+  const pendingFollowups = upcomingReminders.filter((r: any) => r.reminderType === 'Follow-up').length;
+
+  const now = new Date();
+  const oneWeekLater = new Date();
+  oneWeekLater.setDate(now.getDate() + 7);
+  const deadlinesThisWeek = upcomingReminders.filter((r: any) => {
+    const dueDate = new Date(r.dueDate);
+    return dueDate >= now && dueDate <= oneWeekLater;
+  }).length;
+
   return (
-    <div className="space-y-8 animate-fade-in">
-      {/* Overview Block */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">Your Pipeline</h1>
-          <p className="text-zinc-400 text-sm mt-1">Real-time statistics of your active career applications.</p>
-        </div>
-        <Link
-          href="/applications?create=true"
-          className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition duration-150 shadow-lg glow-indigo w-fit"
-        >
-          <Plus className="h-4 w-4" />
-          Add Application
-        </Link>
-      </div>
-
-      {/* Metrics Row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-card rounded-2xl p-5 border border-zinc-800">
-          <div className="flex justify-between items-start">
-            <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Total Applications</span>
-            <div className="p-1.5 rounded-lg bg-zinc-800/80 text-zinc-300">
-              <Briefcase className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="text-3xl font-bold text-white mt-2">{totalApplications}</div>
-        </div>
-
-        <div className="glass-card rounded-2xl p-5 border border-zinc-800">
-          <div className="flex justify-between items-start">
-            <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Active Search</span>
-            <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-              <TrendingUp className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="text-3xl font-bold text-white mt-2">{activeApplications}</div>
-        </div>
-
-        <div className="glass-card rounded-2xl p-5 border border-zinc-800">
-          <div className="flex justify-between items-start">
-            <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Offers Received</span>
-            <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <CheckCircle className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="text-3xl font-bold text-emerald-400 mt-2">
-            {applicationsByStatus['OfferReceived'] || 0}
-          </div>
-        </div>
-
-        <div className="glass-card rounded-2xl p-5 border border-zinc-800">
-          <div className="flex justify-between items-start">
-            <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Pending Interviews</span>
-            <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              <Clock className="h-4 w-4" />
-            </div>
-          </div>
-          <div className="text-3xl font-bold text-amber-400 mt-2">
-            {upcomingInterviews.length}
+    <div className="space-y-10 animate-fade-in pb-12">
+      {/* 1. Richer Welcome Hero Section */}
+      <div className="relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-zinc-900/40 p-6 md:p-8">
+        <div className="absolute right-0 top-0 h-64 w-64 bg-indigo-500/5 blur-3xl rounded-full -mr-20 -mt-20 pointer-events-none" />
+        <div className="space-y-4">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
+            {greeting}, {userName} 👋
+          </h1>
+          <div className="max-w-2xl space-y-1.5">
+            <p className="text-base md:text-lg text-zinc-300 font-medium">
+              Track every application. Never miss an interview. Land your next offer.
+            </p>
+            <p className="text-xs md:text-sm text-zinc-500 italic mt-3 border-l-2 border-indigo-500/60 pl-3">
+              "Stay consistent. Every application gets you closer to your next opportunity."
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Pipeline Status Breakdown */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-        {pipelineStatuses.map((status) => {
-          const count = applicationsByStatus[status.key] || 0;
-          return (
-            <div
-              key={status.key}
-              className="glass-card rounded-xl p-3 border border-zinc-800/80 text-center flex flex-col items-center justify-center min-h-[90px]"
-            >
-              <span className="text-[10px] font-semibold text-zinc-400 block truncate w-full max-w-[80px]">
-                {status.label}
-              </span>
-              <span className={`text-xl font-bold mt-1 ${count > 0 ? 'text-white font-extrabold' : 'text-zinc-600'}`}>
-                {count}
-              </span>
+      {/* 2. Today's Progress Hero Card */}
+      <div className="glass-card rounded-3xl border border-zinc-800/80 p-6 md:p-8 glow-indigo relative overflow-hidden">
+        <div className="absolute right-0 top-0 h-48 w-48 bg-indigo-500/10 blur-3xl rounded-full -mr-16 -mt-16 pointer-events-none" />
+        
+        <h2 className="text-lg font-bold text-white mb-6 tracking-wide flex items-center gap-2">
+          <TrendingUp className="h-5 w-5 text-indigo-400" />
+          Today's Progress
+        </h2>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {/* Applications Today with Progress Bar */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <Briefcase className="h-4 w-4 text-indigo-400" />
+              <span className="text-xs font-semibold uppercase tracking-wider">Applications Today</span>
             </div>
-          );
-        })}
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold text-white">{appsToday || 0}</span>
+              <span className="text-zinc-500 text-sm">/ {appsGoal}</span>
+            </div>
+            <div className="h-1.5 w-full bg-zinc-800/80 rounded-full overflow-hidden mt-3">
+              <div 
+                className="h-full bg-indigo-500 rounded-full transition-all duration-500" 
+                style={{ width: `${progressPercent}%` }} 
+              />
+            </div>
+          </div>
+
+          {/* Upcoming Interviews */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <Calendar className="h-4 w-4 text-purple-400" />
+              <span className="text-xs font-semibold uppercase tracking-wider">Upcoming Interviews</span>
+            </div>
+            <div className="text-3xl font-extrabold text-white">{upcomingInterviews.length || 0}</div>
+          </div>
+
+          {/* Pending Follow-ups */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <Clock className="h-4 w-4 text-amber-400" />
+              <span className="text-xs font-semibold uppercase tracking-wider">Pending Follow-ups</span>
+            </div>
+            <div className="text-3xl font-extrabold text-white">{pendingFollowups || 0}</div>
+          </div>
+
+          {/* Deadlines This Week */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2 text-zinc-400">
+              <CheckCircle className="h-4 w-4 text-emerald-400" />
+              <span className="text-xs font-semibold uppercase tracking-wider">Deadlines This Week</span>
+            </div>
+            <div className="text-3xl font-extrabold text-white">{deadlinesThisWeek || 0}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Quick Actions Section */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-bold text-white tracking-tight">Quick Actions</h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link
+            href="/applications?create=true"
+            className="glass-card hover:bg-zinc-900/60 p-5 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center text-center gap-3 group transition duration-200 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          >
+            <div className="p-3.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 group-hover:scale-110 group-hover:bg-indigo-500/20 transition-all duration-200">
+              <Plus className="h-6 w-6" />
+            </div>
+            <span className="font-semibold text-sm text-zinc-200 group-hover:text-white transition">Add Application</span>
+          </Link>
+
+          <Link
+            href="/resumes?upload=true"
+            className="glass-card hover:bg-zinc-900/60 p-5 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center text-center gap-3 group transition duration-200 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          >
+            <div className="p-3.5 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 group-hover:scale-110 group-hover:bg-purple-500/20 transition-all duration-200">
+              <FileText className="h-6 w-6" />
+            </div>
+            <span className="font-semibold text-sm text-zinc-200 group-hover:text-white transition">Upload Resume</span>
+          </Link>
+
+          <Link
+            href="/interviews?create=true"
+            className="glass-card hover:bg-zinc-900/60 p-5 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center text-center gap-3 group transition duration-200 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          >
+            <div className="p-3.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 group-hover:scale-110 group-hover:bg-amber-500/20 transition-all duration-200">
+              <Calendar className="h-6 w-6" />
+            </div>
+            <span className="font-semibold text-sm text-zinc-200 group-hover:text-white transition">Schedule Interview</span>
+          </Link>
+
+          <Link
+            href="/reminders?create=true"
+            className="glass-card hover:bg-zinc-900/60 p-5 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center text-center gap-3 group transition duration-200 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          >
+            <div className="p-3.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all duration-200">
+              <Bell className="h-6 w-6" />
+            </div>
+            <span className="font-semibold text-sm text-zinc-200 group-hover:text-white transition">Add Reminder</span>
+          </Link>
+        </div>
+      </div>
+
+      {/* 4. Active Pipeline Breakdown */}
+      <div className="space-y-4">
+        <h2 className="text-xl font-bold text-white tracking-tight">Active Pipeline</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+          {pipelineStatuses.map((status) => {
+            const count = applicationsByStatus[status.key] || 0;
+            return (
+              <div
+                key={status.key}
+                className="glass-card rounded-xl p-3 border border-zinc-800/80 text-center flex flex-col items-center justify-center min-h-[90px] hover:border-zinc-700/60 transition"
+              >
+                <span className="text-[10px] font-semibold text-zinc-400 block truncate w-full max-w-[80px]">
+                  {status.label}
+                </span>
+                <span className={`text-xl font-bold mt-1 ${count > 0 ? 'text-white font-extrabold' : 'text-zinc-600'}`}>
+                  {count}
+                </span>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Grid: Upcoming Interviews & Reminders */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Interviews */}
-        <div className="glass-card rounded-2xl border border-zinc-800 p-6 flex flex-col">
+        {/* Interviews Section */}
+        <div className="glass-card rounded-2xl border border-zinc-800 p-6 flex flex-col min-h-[300px]">
           <div className="flex items-center justify-between border-b border-zinc-800 pb-4 mb-4">
             <h3 className="font-bold text-lg text-white">Upcoming Interviews</h3>
             <Link href="/interviews" className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
@@ -196,8 +291,21 @@ export default function DashboardPage() {
 
           <div className="flex-1 space-y-4">
             {upcomingInterviews.length === 0 ? (
-              <div className="text-center py-12 text-zinc-500 text-sm">
-                No interviews scheduled. Good luck preparing!
+              /* Improved Empty State */
+              <div className="text-center py-12 flex flex-col items-center justify-center h-full">
+                <div className="p-3 rounded-full bg-zinc-900/60 text-zinc-500 mb-3 border border-zinc-800">
+                  <Calendar className="h-6 w-6 text-purple-400/80" />
+                </div>
+                <h4 className="font-bold text-white text-sm">No interviews scheduled</h4>
+                <p className="text-zinc-400 text-xs max-w-xs mx-auto mt-1 mb-4 leading-relaxed">
+                  Prepare for your next step. Schedule your first interview to track platforms, meeting dates, and questions.
+                </p>
+                <Link 
+                  href="/interviews?create=true" 
+                  className="inline-flex items-center gap-1 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg px-3 py-1.5 text-xs font-semibold transition"
+                >
+                  Schedule Interview
+                </Link>
               </div>
             ) : (
               upcomingInterviews.map((interview: any) => (
@@ -239,8 +347,8 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Reminders Checklist */}
-        <div className="glass-card rounded-2xl border border-zinc-800 p-6 flex flex-col">
+        {/* Reminders Checklist Section */}
+        <div className="glass-card rounded-2xl border border-zinc-800 p-6 flex flex-col min-h-[300px]">
           <div className="flex items-center justify-between border-b border-zinc-800 pb-4 mb-4">
             <h3 className="font-bold text-lg text-white">Pending Reminders</h3>
             <Link href="/reminders" className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
@@ -250,8 +358,21 @@ export default function DashboardPage() {
 
           <div className="flex-1 space-y-3">
             {upcomingReminders.length === 0 ? (
-              <div className="text-center py-12 text-zinc-500 text-sm">
-                Clean board! All follow-ups completed.
+              /* Improved Empty State */
+              <div className="text-center py-12 flex flex-col items-center justify-center h-full">
+                <div className="p-3 rounded-full bg-zinc-900/60 text-zinc-500 mb-3 border border-zinc-800">
+                  <Bell className="h-6 w-6 text-emerald-400/80" />
+                </div>
+                <h4 className="font-bold text-white text-sm">No reminders set</h4>
+                <p className="text-zinc-400 text-xs max-w-xs mx-auto mt-1 mb-4 leading-relaxed">
+                  Keep your search on track. Create a reminder for document submissions, follow-ups, or offer deadlines.
+                </p>
+                <Link 
+                  href="/reminders?create=true" 
+                  className="inline-flex items-center gap-1 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg px-3 py-1.5 text-xs font-semibold transition"
+                >
+                  Create Reminder
+                </Link>
               </div>
             ) : (
               upcomingReminders.map((reminder: any) => (
@@ -300,8 +421,22 @@ export default function DashboardPage() {
 
         <div className="overflow-x-auto">
           {recentApplications.length === 0 ? (
-            <div className="text-center py-12 text-zinc-500 text-sm">
-              Your tracking history is empty. Submit your first application above!
+            /* Improved Empty State */
+            <div className="text-center py-16 flex flex-col items-center justify-center">
+              <div className="p-4 rounded-full bg-zinc-900/60 text-zinc-500 mb-3 border border-zinc-800">
+                <Briefcase className="h-8 w-8 text-indigo-400/80" />
+              </div>
+              <h4 className="font-bold text-white text-base">Your job search starts here</h4>
+              <p className="text-zinc-400 text-sm max-w-sm mx-auto mt-1 mb-5 leading-relaxed">
+                Add your first application and CareerOS will automatically begin tracking your pipeline progress.
+              </p>
+              <Link 
+                href="/applications?create=true" 
+                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition duration-150 shadow-lg glow-indigo w-fit"
+              >
+                <Plus className="h-4 w-4" />
+                Add Application
+              </Link>
             </div>
           ) : (
             <table className="w-full text-left text-sm text-zinc-300">
