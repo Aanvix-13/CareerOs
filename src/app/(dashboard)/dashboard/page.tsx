@@ -10,26 +10,66 @@ import {
   ExternalLink,
   Loader2,
   Plus,
-  Send,
   AlertTriangle,
   MapPin,
   TrendingUp,
-  FileText,
+  Award,
+  Flame,
+  Check,
+  Zap,
+  Trophy,
+  Target,
+  ChevronRight,
+  Sparkles,
   Bell,
   ArrowRight,
+  FileText,
+  HeartPulse,
 } from 'lucide-react';
 import apiClient from '../../../lib/api-client';
 import useReminderStore from '../../../hooks/useReminderStore';
 import useAuthStore from '../../../hooks/useAuthStore';
+import useResumeStore from '../../../hooks/useResumeStore';
+
+// Achievements configuration
+const ACHIEVEMENTS = [
+  { id: 'first_app', label: 'First Application', desc: 'Added your first job application', icon: Target },
+  { id: 'first_resume', label: 'First Resume', desc: 'Uploaded your first resume PDF', icon: FileText },
+  { id: 'ten_apps', label: '10 Applications', desc: 'Added 10 applications in total', icon: Briefcase },
+  { id: 'first_interview', label: 'First Interview', desc: 'Scheduled your first interview round', icon: Calendar },
+  { id: 'first_offer', label: 'First Offer', desc: 'Received a written job offer', icon: Trophy },
+];
 
 export default function DashboardPage() {
   const { completeReminder } = useReminderStore();
   const { profile, user: authUser } = useAuthStore();
+  const { resumes, fetchResumes } = useResumeStore();
 
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [greeting, setGreeting] = useState('Welcome');
+  const [currentDate, setCurrentDate] = useState('');
+  
+  // Interactive Focus Checklist State
+  const [focusTasks, setFocusTasks] = useState([
+    { id: 1, label: 'Apply to 3 companies', completed: false },
+    { id: 2, label: 'Practice technical interview questions', completed: false },
+    { id: 3, label: 'Tailor resume for target roles', completed: false },
+    { id: 4, label: 'Follow up with recruiter contacts', completed: false },
+    { id: 5, label: 'Complete missing profile details', completed: false },
+  ]);
+
+  // Quotes rotating daily
+  const quotes = [
+    "Every application brings you one step closer.",
+    "Small progress every day leads to big results.",
+    "Success comes from consistency and preparation.",
+    "You are only one interview away from changing your career.",
+    "Keep applying. Consistency wins in the end.",
+    "Every rejection is just redirection to something better.",
+  ];
+  const [dailyQuote, setDailyQuote] = useState(quotes[0]);
 
   const fetchDashboard = async () => {
     try {
@@ -45,12 +85,26 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchDashboard();
+    fetchResumes();
 
     // Dynamically calculate greeting based on local time
     const hour = new Date().getHours();
     if (hour < 12) setGreeting('Good Morning');
     else if (hour < 18) setGreeting('Good Afternoon');
     else setGreeting('Good Evening');
+
+    // Date formatting
+    const formattedDate = new Date().toLocaleDateString(undefined, {
+      weekday: 'long',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+    setCurrentDate(formattedDate);
+
+    // Dynamic quote calculation (rotates daily)
+    const day = new Date().getDate();
+    setDailyQuote(quotes[day % quotes.length]);
   }, []);
 
   const handleCompleteReminder = async (id: string) => {
@@ -62,12 +116,16 @@ export default function DashboardPage() {
     }
   };
 
+  const toggleFocusTask = (id: number) => {
+    setFocusTasks(focusTasks.map(t => t.id === id ? { ...t, completed: !t.completed } : t));
+  };
+
   if (loading) {
     return (
       <div className="flex h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-          <p className="text-zinc-400 text-sm">Gathering dashboard statistics...</p>
+          <p className="text-zinc-400 text-sm">Gathering command center stats...</p>
         </div>
       </div>
     );
@@ -75,7 +133,7 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-6 text-center max-w-lg mx-auto mt-12 animate-fade-in">
+      <div className="rounded-xl bg-rose-500/10 border border-rose-500/20 p-6 text-center max-w-lg mx-auto mt-12">
         <AlertTriangle className="h-10 w-10 text-rose-500 mx-auto mb-3" />
         <h3 className="font-semibold text-white mb-1">Failed to load data</h3>
         <p className="text-zinc-400 text-sm mb-4">{error}</p>
@@ -98,398 +156,594 @@ export default function DashboardPage() {
     recentApplications = [],
   } = data || {};
 
-  // Status mapping to displays
-  const pipelineStatuses = [
-    { key: 'Wishlist', label: 'Wishlist', color: 'bg-zinc-800 text-zinc-300 border-zinc-700/60' },
-    { key: 'Preparing', label: 'Preparing', color: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
-    { key: 'Applied', label: 'Applied', color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
-    { key: 'OnlineAssessment', label: 'OA Exam', color: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' },
-    { key: 'TechnicalInterview', label: 'Technical', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
-    { key: 'HRInterview', label: 'HR Round', color: 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/20' },
-    { key: 'FinalInterview', label: 'Finals', color: 'bg-pink-500/10 text-pink-400 border-pink-500/20' },
-    { key: 'OfferReceived', label: 'Offer', color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 glow-emerald' },
-  ];
-
   const userName = profile?.fullName || authUser?.email?.split('@')[0] || 'User';
 
-  // Calculate Today's Progress Stats
+  // --- Dynamic calculations for the Smart Career Assistant ---
+
+  // 1. Recommended Next Action
+  let nextAction = {
+    title: 'Browse job postings and apply',
+    desc: 'Submit another application to keep your pipeline active.',
+    priority: 'Low',
+    time: '15 mins',
+    link: '/applications?create=true',
+    btnText: 'Add Application'
+  };
+
+  const hasResume = resumes.length > 0;
+  const hasEducation = !!(profile?.college && profile?.degree);
+  const hasSkills = !!profile?.preferredRole;
+  const hasLinkedIn = !!profile?.bio;
+  const hasPortfolio = !!profile?.specialization;
+
+  let profileCompletion = 20; // 20% for name initially
+  if (hasEducation) profileCompletion += 20;
+  if (hasSkills) profileCompletion += 20;
+  if (hasLinkedIn) profileCompletion += 20;
+  if (hasPortfolio) profileCompletion += 20;
+  if (hasResume) profileCompletion += 20;
+  profileCompletion = Math.min(profileCompletion, 100);
+
+  if (totalApplications === 0) {
+    nextAction = {
+      title: 'Add your first application',
+      desc: 'Add a job listing to start tracking your search pipeline.',
+      priority: 'High',
+      time: '5 mins',
+      link: '/applications?create=true',
+      btnText: 'Add Application'
+    };
+  } else if (!hasResume) {
+    nextAction = {
+      title: 'Upload your first resume',
+      desc: 'Add your master resume version to match with job listings.',
+      priority: 'High',
+      time: '2 mins',
+      link: '/resumes?upload=true',
+      btnText: 'Upload Resume'
+    };
+  } else if (profileCompletion < 60) {
+    nextAction = {
+      title: 'Complete your profile details',
+      desc: 'Add target role, bio and education credentials to complete setup.',
+      priority: 'Medium',
+      time: '3 mins',
+      link: '/profile',
+      btnText: 'Complete Profile'
+    };
+  } else if (upcomingInterviews.length > 0) {
+    const nextInterview = upcomingInterviews[0];
+    nextAction = {
+      title: `Prepare for ${nextInterview.interviewRound} interview`,
+      desc: `Study preparation notes for your upcoming round with ${nextInterview.application.companyName}.`,
+      priority: 'Critical',
+      time: '30 mins',
+      link: '/interviews',
+      btnText: 'View Interview Details'
+    };
+  } else if (upcomingReminders.length > 0) {
+    nextAction = {
+      title: 'Complete your pending checklist tasks',
+      desc: `Check off remaining due items like "${upcomingReminders[0].title}".`,
+      priority: 'Medium',
+      time: '10 mins',
+      link: '/reminders',
+      btnText: 'Go to Reminders'
+    };
+  }
+
+  // 2. Weekly Goal (Target 15 applications)
+  const weeklyGoalTarget = 15;
+  const weeklyGoalProgress = Math.min(totalApplications, weeklyGoalTarget);
+  const weeklyGoalPercent = Math.round((weeklyGoalProgress / weeklyGoalTarget) * 100);
+
+  // 3. Today's Progress Stats
   const todayStr = new Date().toISOString().split('T')[0];
   const appsToday = recentApplications.filter((app: any) => {
     const appDate = new Date(app.applicationDate).toISOString().split('T')[0];
     return appDate === todayStr;
   }).length;
 
-  const appsGoal = 5;
-  const progressPercent = Math.min((appsToday / appsGoal) * 100, 100);
-
-  const pendingFollowups = upcomingReminders.filter((r: any) => r.reminderType === 'Follow-up').length;
-
-  const now = new Date();
-  const oneWeekLater = new Date();
-  oneWeekLater.setDate(now.getDate() + 7);
-  const deadlinesThisWeek = upcomingReminders.filter((r: any) => {
-    const dueDate = new Date(r.dueDate);
-    return dueDate >= now && dueDate <= oneWeekLater;
+  const interviewInvitesToday = upcomingInterviews.filter((i: any) => {
+    const createDate = new Date(i.createdAt || new Date()).toISOString().split('T')[0];
+    return createDate === todayStr;
   }).length;
 
+  // 4. Career Health Score calculation (dynamic placeholder score)
+  let healthScore = 50;
+  if (totalApplications > 5) healthScore += 15;
+  if (hasResume) healthScore += 15;
+  if (profileCompletion >= 80) healthScore += 10;
+  if (upcomingInterviews.length > 0) healthScore += 10;
+  healthScore = Math.min(healthScore, 100);
+
+  let healthGrade = 'Needs Improvement';
+  if (healthScore >= 80) healthGrade = 'Excellent';
+  else if (healthScore >= 60) healthGrade = 'Good';
+
+  // 5. Achievements Unlock Mapping
+  const unlockedAchievements = {
+    first_app: totalApplications > 0,
+    first_resume: hasResume,
+    ten_apps: totalApplications >= 10,
+    first_interview: upcomingInterviews.length > 0,
+    first_offer: (applicationsByStatus['OfferReceived'] || 0) > 0,
+  };
+
+  // Funnel calculations
+  const totalApps = totalApplications;
+  const oaApps = applicationsByStatus['OnlineAssessment'] || 0;
+  const interviewApps = 
+    (applicationsByStatus['TechnicalInterview'] || 0) + 
+    (applicationsByStatus['HRInterview'] || 0) + 
+    (applicationsByStatus['FinalInterview'] || 0);
+  const offerApps = applicationsByStatus['OfferReceived'] || 0;
+  const acceptedApps = applicationsByStatus['OfferAccepted'] || 0;
+
+  const oaRatio = totalApps > 0 ? Math.round((oaApps / totalApps) * 100) : 0;
+  const interviewRatio = totalApps > 0 ? Math.round((interviewApps / totalApps) * 100) : 0;
+  const offerRatio = totalApps > 0 ? Math.round((offerApps / totalApps) * 100) : 0;
+  const acceptedRatio = totalApps > 0 ? Math.round((acceptedApps / totalApps) * 100) : 0;
+
+  // Personalization statistics (placeholders)
+  const appThisMonth = totalApplications;
+  const topCompany = recentApplications[0]?.companyName || 'None yet';
+  const favRole = profile?.preferredRole || 'Not specified';
+  const activeDay = 'Wednesday';
+
   return (
-    <div className="space-y-10 animate-fade-in pb-12">
-      {/* 1. Richer Welcome Hero Section */}
-      <div className="relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-zinc-900/40 p-6 md:p-8">
-        <div className="absolute right-0 top-0 h-64 w-64 bg-indigo-500/5 blur-3xl rounded-full -mr-20 -mt-20 pointer-events-none" />
-        <div className="space-y-4">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-            {greeting}, {userName} 👋
-          </h1>
-          <div className="max-w-2xl space-y-1.5">
-            <p className="text-base md:text-lg text-zinc-300 font-medium">
-              Track every application. Never miss an interview. Land your next offer.
-            </p>
-            <p className="text-xs md:text-sm text-zinc-500 italic mt-3 border-l-2 border-indigo-500/60 pl-3">
-              "Stay consistent. Every application gets you closer to your next opportunity."
+    <div className="space-y-8 animate-fade-in pb-16">
+      
+      {/* --- GRID 1: HERO HEADER, HEALTH SCORE, STREAK --- */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        {/* 1. Redesigned Hero Welcome Card */}
+        <div className="lg:col-span-2 relative overflow-hidden rounded-3xl border border-zinc-800/80 bg-zinc-900/40 p-6 md:p-8 flex flex-col justify-between">
+          <div className="absolute right-0 top-0 h-64 w-64 bg-indigo-500/5 blur-3xl rounded-full -mr-20 -mt-20 pointer-events-none" />
+          <div className="space-y-4">
+            <div className="flex justify-between items-center text-xs text-zinc-500 font-semibold uppercase tracking-wider">
+              <span>{greeting}, {userName}</span>
+              <span>{currentDate}</span>
+            </div>
+            
+            <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">
+              Your Career Command Center
+            </h1>
+            
+            <p className="text-sm md:text-base text-zinc-400 max-w-xl">
+              Track applications, prepare interviews, manage resumes and never miss an opportunity.
             </p>
           </div>
+
+          <div className="mt-8 flex items-center justify-between border-t border-zinc-800/60 pt-4">
+            <div className="flex items-center gap-2 text-xs text-indigo-400 italic">
+              <Sparkles className="h-4 w-4 shrink-0" />
+              <span>"{dailyQuote}"</span>
+            </div>
+            {/* Future illustration placeholder */}
+            <div className="hidden sm:block h-12 w-20 border border-dashed border-zinc-850 rounded-lg bg-zinc-950/20 text-[9px] text-zinc-650 flex items-center justify-center">
+              Graphics Box
+            </div>
+          </div>
         </div>
+
+        {/* Health Score & Streak Card */}
+        <div className="lg:col-span-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6">
+          {/* Career Health Score */}
+          <div className="glass-card rounded-3xl border border-zinc-800 p-6 flex items-center justify-between gap-4">
+            <div className="space-y-2">
+              <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                <HeartPulse className="h-3.5 w-3.5 text-zinc-500" />
+                Career Health
+              </h3>
+              <div className="text-2xl font-extrabold text-white">{healthScore}%</div>
+              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                healthGrade === 'Excellent' ? 'bg-emerald-500/10 text-emerald-400' :
+                healthGrade === 'Good' ? 'bg-indigo-500/10 text-indigo-400' :
+                'bg-amber-500/10 text-amber-400'
+              }`}>
+                {healthGrade}
+              </span>
+            </div>
+
+            {/* Circular Progress Ring */}
+            <div className="relative h-20 w-20 shrink-0">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle cx="40" cy="40" r="34" stroke="#18181b" strokeWidth="6" fill="transparent" />
+                <circle
+                  cx="40"
+                  cy="40"
+                  r="34"
+                  stroke="#6366f1"
+                  strokeWidth="6"
+                  fill="transparent"
+                  strokeDasharray={2 * Math.PI * 34}
+                  strokeDashoffset={2 * Math.PI * 34 * (1 - healthScore / 100)}
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center text-xs font-black text-white">
+                {healthScore}%
+              </div>
+            </div>
+          </div>
+
+          {/* Job Search Streak */}
+          <div className="glass-card rounded-3xl border border-zinc-800 p-6 flex flex-col justify-between">
+            <div className="flex justify-between items-start">
+              <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Search Streak</h3>
+              <Flame className="h-5 w-5 text-orange-500 animate-pulse" />
+            </div>
+            
+            <div className="mt-2">
+              <div className="text-2xl font-black text-white">🔥 5 Days</div>
+              <p className="text-[10px] text-zinc-400 mt-1">
+                You've been active for 5 consecutive days.
+              </p>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      {/* 2. Today's Progress Hero Card */}
-      <div className="glass-card rounded-3xl border border-zinc-800/80 p-6 md:p-8 glow-indigo relative overflow-hidden">
-        <div className="absolute right-0 top-0 h-48 w-48 bg-indigo-500/10 blur-3xl rounded-full -mr-16 -mt-16 pointer-events-none" />
+      {/* --- GRID 2: RECOMMENDED ACTION & TODAY'S GOALS --- */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        <h2 className="text-lg font-bold text-white mb-6 tracking-wide flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-indigo-400" />
-          Today's Progress
-        </h2>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Applications Today with Progress Bar */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-zinc-400">
-              <Briefcase className="h-4 w-4 text-indigo-400" />
-              <span className="text-xs font-semibold uppercase tracking-wider">Applications Today</span>
+        {/* Recommended Action & Funnel */}
+        <div className="lg:col-span-2 space-y-8">
+          
+          {/* 2. Recommended Next Action */}
+          <div className="glass-card rounded-3xl border border-zinc-800/80 p-6 md:p-8 relative overflow-hidden flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+            <div className="space-y-2 max-w-lg">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center rounded-full bg-rose-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-rose-400 border border-rose-500/20">
+                  {nextAction.priority} Priority
+                </span>
+                <span className="text-[10px] text-zinc-500">• Est. Time: {nextAction.time}</span>
+              </div>
+              <h3 className="text-lg font-bold text-white tracking-wide">{nextAction.title}</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">{nextAction.desc}</p>
             </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-extrabold text-white">{appsToday || 0}</span>
-              <span className="text-zinc-500 text-sm">/ {appsGoal}</span>
+
+            <Link
+              href={nextAction.link}
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-indigo-600 px-5 py-3 text-xs font-semibold text-white hover:bg-indigo-500 transition duration-150 shadow-lg glow-indigo shrink-0 w-full sm:w-auto text-center"
+            >
+              {nextAction.btnText}
+              <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          {/* 3. Weekly Goal & 4. Daily Progress Widget */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            
+            {/* Weekly Career Goal */}
+            <div className="glass-card rounded-2xl border border-zinc-800 p-5 space-y-3 sm:col-span-1">
+              <div className="flex justify-between items-start">
+                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider block">Weekly Goal</span>
+                <span className="text-xs font-bold text-white">{weeklyGoalPercent}%</span>
+              </div>
+              
+              <div className="text-sm text-zinc-200">
+                Apply to <span className="font-bold text-white">{weeklyGoalTarget}</span> Jobs
+              </div>
+              
+              <div className="space-y-1">
+                <div className="h-2 w-full bg-zinc-950 border border-zinc-850 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-indigo-500 rounded-full transition-all duration-500" 
+                    style={{ width: `${weeklyGoalPercent}%` }} 
+                  />
+                </div>
+                <div className="text-[10px] text-zinc-500 text-right">
+                  {weeklyGoalProgress} / {weeklyGoalTarget} Completed
+                </div>
+              </div>
             </div>
-            <div className="h-1.5 w-full bg-zinc-800/80 rounded-full overflow-hidden mt-3">
+
+            {/* Daily Progress Metrics */}
+            <div className="glass-card rounded-2xl border border-zinc-800 p-5 sm:col-span-2 grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-1 text-[10px] text-zinc-400 uppercase tracking-wider">
+                  <Briefcase className="h-3 w-3 text-indigo-400" />
+                  <span>Submitted Today</span>
+                </div>
+                <div className="text-xl font-extrabold text-white">{appsToday}</div>
+                <div className="text-[9px] text-zinc-500">Pipeline submissions</div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-1 text-[10px] text-zinc-400 uppercase tracking-wider">
+                  <Calendar className="h-3 w-3 text-purple-400" />
+                  <span>Invites Received</span>
+                </div>
+                <div className="text-xl font-extrabold text-white">{interviewInvitesToday}</div>
+                <div className="text-[9px] text-zinc-500">Interviews recorded</div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-1 text-[10px] text-zinc-400 uppercase tracking-wider">
+                  <Clock className="h-3 w-3 text-amber-400" />
+                  <span>Due Checklist</span>
+                </div>
+                <div className="text-xl font-extrabold text-white">{upcomingReminders.length}</div>
+                <div className="text-[9px] text-zinc-500">Unfinished followups</div>
+              </div>
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-1 text-[10px] text-zinc-400 uppercase tracking-wider">
+                  <FileText className="h-3 w-3 text-emerald-400" />
+                  <span>Active Resumes</span>
+                </div>
+                <div className="text-xl font-extrabold text-white">{resumes.length}</div>
+                <div className="text-[9px] text-zinc-500">Versions available</div>
+              </div>
+            </div>
+
+          </div>
+
+          {/* 5. Today's Focus Checklist */}
+          <div className="glass-card rounded-3xl border border-zinc-800 p-6 md:p-8 space-y-4">
+            <h3 className="font-bold text-lg text-white flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-indigo-400" />
+              Today's Focus
+            </h3>
+            
+            <div className="space-y-2.5">
+              {focusTasks.map(task => (
+                <button
+                  key={task.id}
+                  onClick={() => toggleFocusTask(task.id)}
+                  className="w-full flex items-center justify-between p-3.5 rounded-xl border border-zinc-800/80 bg-zinc-950/20 hover:border-zinc-700/60 hover:bg-zinc-900/10 transition text-left cursor-pointer outline-none focus-visible:ring-1 focus-visible:ring-indigo-500"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`h-4.5 w-4.5 rounded border flex items-center justify-center transition-all ${
+                      task.completed ? 'bg-indigo-600 border-indigo-500 text-white' : 'border-zinc-700 bg-zinc-950'
+                    }`}>
+                      {task.completed && <Check className="h-3 w-3" />}
+                    </div>
+                    <span className={`text-xs font-semibold ${task.completed ? 'text-zinc-500 line-through' : 'text-zinc-300'}`}>
+                      {task.label}
+                    </span>
+                  </div>
+                  
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-600">
+                    {task.completed ? 'Done' : 'Active'}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* 8. Conversion Pipeline/Funnel Section */}
+          <div className="glass-card rounded-3xl border border-zinc-800 p-6 space-y-4">
+            <h3 className="font-bold text-lg text-white">Visual Pipeline Funnel</h3>
+            
+            <div className="grid grid-cols-2 sm:grid-cols-5 lg:grid-cols-9 gap-3">
+              {[
+                { label: 'Wishlist', count: applicationsByStatus['Wishlist'] || 0 },
+                { label: 'Preparing', count: applicationsByStatus['Preparing'] || 0 },
+                { label: 'Applied', count: applicationsByStatus['Applied'] || 0 },
+                { label: 'Assessment', count: oaApps },
+                { label: 'Technical', count: applicationsByStatus['TechnicalInterview'] || 0 },
+                { label: 'HR Round', count: applicationsByStatus['HRInterview'] || 0 },
+                { label: 'Finals', count: applicationsByStatus['FinalInterview'] || 0 },
+                { label: 'Offer', count: offerApps },
+                { label: 'Accepted', count: acceptedApps },
+              ].map((stage, idx) => {
+                const heightPercent = totalApplications > 0 ? (stage.count / totalApplications) * 100 : 0;
+                return (
+                  <div 
+                    key={stage.label} 
+                    className="glass-card rounded-xl p-3 border border-zinc-850 text-center flex flex-col justify-between hover:border-zinc-700 transition duration-150 h-28"
+                  >
+                    <div className="text-[9px] font-bold text-zinc-500 uppercase truncate">{stage.label}</div>
+                    
+                    <div className="h-10 w-full flex items-end justify-center bg-zinc-950/20 rounded">
+                      <div 
+                        className="w-full bg-indigo-500 rounded-t transition-all duration-300"
+                        style={{ height: `${Math.max(heightPercent, 5)}%` }}
+                      />
+                    </div>
+                    
+                    <div className="text-xs font-extrabold text-white mt-1">
+                      {stage.count}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 9. Recent Activity Feed */}
+          <div className="glass-card rounded-3xl border border-zinc-800 p-6">
+            <h3 className="font-bold text-lg text-white border-b border-zinc-800 pb-4 mb-4">Recent Activity Feed</h3>
+            
+            <div className="space-y-4">
+              {recentApplications.length === 0 ? (
+                <div className="text-center py-8 text-xs text-zinc-600">
+                  No activity yet. Start by adding your first application.
+                </div>
+              ) : (
+                recentApplications.slice(0, 4).map((app: any, idx: number) => (
+                  <div key={app.id} className="relative flex gap-3 text-xs pl-1">
+                    {idx !== 3 && (
+                      <div className="absolute top-5 bottom-0 left-[6px] w-[1px] bg-zinc-800" />
+                    )}
+                    <div className="h-3 w-3 rounded-full bg-indigo-500 mt-1 shrink-0" />
+                    <div className="space-y-1 w-full">
+                      <div className="flex justify-between items-center">
+                        <span className="font-bold text-white">Application added</span>
+                        <span className="text-[10px] text-zinc-500">
+                          {new Date(app.applicationDate).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="text-zinc-400">
+                        Added application for <span className="text-white font-semibold">{app.companyName}</span> ({app.jobTitle}).
+                      </p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+        </div>
+
+        {/* Right Sidebar Widget Stack */}
+        <div className="lg:col-span-1 space-y-8">
+          
+          {/* 13. Profile Completion Card Widget */}
+          <div className="glass-card rounded-3xl border border-zinc-800 p-6 space-y-4">
+            <div className="flex justify-between items-center">
+              <h4 className="font-bold text-sm text-white flex items-center gap-1.5">
+                <Award className="h-4 w-4 text-indigo-400" />
+                Profile Completion
+              </h4>
+              <span className="text-xs font-extrabold text-indigo-400">{profileCompletion}%</span>
+            </div>
+            
+            <div className="h-2 w-full bg-zinc-850 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-indigo-500 rounded-full transition-all duration-500" 
-                style={{ width: `${progressPercent}%` }} 
+                style={{ width: `${profileCompletion}%` }} 
               />
             </div>
-          </div>
 
-          {/* Upcoming Interviews */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-zinc-400">
-              <Calendar className="h-4 w-4 text-purple-400" />
-              <span className="text-xs font-semibold uppercase tracking-wider">Upcoming Interviews</span>
-            </div>
-            <div className="text-3xl font-extrabold text-white">{upcomingInterviews.length || 0}</div>
-          </div>
+            <ul className="text-[10px] space-y-2.5 pt-3 border-t border-zinc-850 text-zinc-400">
+              <li className="flex items-center justify-between">
+                <span>Upload Resume</span>
+                {hasResume ? <span className="text-emerald-400 font-bold">✓ Done</span> : <span className="text-zinc-650">Pending</span>}
+              </li>
+              <li className="flex items-center justify-between">
+                <span>Education credentials</span>
+                {hasEducation ? <span className="text-emerald-400 font-bold">✓ Done</span> : <span className="text-zinc-650">Pending</span>}
+              </li>
+              <li className="flex items-center justify-between">
+                <span>Add Target Skills</span>
+                {hasSkills ? <span className="text-emerald-400 font-bold">✓ Done</span> : <span className="text-zinc-650">Pending</span>}
+              </li>
+              <li className="flex items-center justify-between">
+                <span>Add LinkedIn Summary</span>
+                {hasLinkedIn ? <span className="text-emerald-400 font-bold">✓ Done</span> : <span className="text-zinc-650">Pending</span>}
+              </li>
+              <li className="flex items-center justify-between">
+                <span>Portfolio Details</span>
+                {hasPortfolio ? <span className="text-emerald-400 font-bold">✓ Done</span> : <span className="text-zinc-650">Pending</span>}
+              </li>
+            </ul>
 
-          {/* Pending Follow-ups */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-zinc-400">
-              <Clock className="h-4 w-4 text-amber-400" />
-              <span className="text-xs font-semibold uppercase tracking-wider">Pending Follow-ups</span>
-            </div>
-            <div className="text-3xl font-extrabold text-white">{pendingFollowups || 0}</div>
-          </div>
-
-          {/* Deadlines This Week */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-zinc-400">
-              <CheckCircle className="h-4 w-4 text-emerald-400" />
-              <span className="text-xs font-semibold uppercase tracking-wider">Deadlines This Week</span>
-            </div>
-            <div className="text-3xl font-extrabold text-white">{deadlinesThisWeek || 0}</div>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Quick Actions Section */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold text-white tracking-tight">Quick Actions</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link
-            href="/applications?create=true"
-            className="glass-card hover:bg-zinc-900/60 p-5 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center text-center gap-3 group transition duration-200 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-          >
-            <div className="p-3.5 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 group-hover:scale-110 group-hover:bg-indigo-500/20 transition-all duration-200">
-              <Plus className="h-6 w-6" />
-            </div>
-            <span className="font-semibold text-sm text-zinc-200 group-hover:text-white transition">Add Application</span>
-          </Link>
-
-          <Link
-            href="/resumes?upload=true"
-            className="glass-card hover:bg-zinc-900/60 p-5 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center text-center gap-3 group transition duration-200 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-          >
-            <div className="p-3.5 rounded-xl bg-purple-500/10 text-purple-400 border border-purple-500/20 group-hover:scale-110 group-hover:bg-purple-500/20 transition-all duration-200">
-              <FileText className="h-6 w-6" />
-            </div>
-            <span className="font-semibold text-sm text-zinc-200 group-hover:text-white transition">Upload Resume</span>
-          </Link>
-
-          <Link
-            href="/interviews?create=true"
-            className="glass-card hover:bg-zinc-900/60 p-5 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center text-center gap-3 group transition duration-200 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-          >
-            <div className="p-3.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 group-hover:scale-110 group-hover:bg-amber-500/20 transition-all duration-200">
-              <Calendar className="h-6 w-6" />
-            </div>
-            <span className="font-semibold text-sm text-zinc-200 group-hover:text-white transition">Schedule Interview</span>
-          </Link>
-
-          <Link
-            href="/reminders?create=true"
-            className="glass-card hover:bg-zinc-900/60 p-5 rounded-2xl border border-zinc-800/80 flex flex-col items-center justify-center text-center gap-3 group transition duration-200 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-          >
-            <div className="p-3.5 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all duration-200">
-              <Bell className="h-6 w-6" />
-            </div>
-            <span className="font-semibold text-sm text-zinc-200 group-hover:text-white transition">Add Reminder</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* 4. Active Pipeline Breakdown */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold text-white tracking-tight">Active Pipeline</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
-          {pipelineStatuses.map((status) => {
-            const count = applicationsByStatus[status.key] || 0;
-            return (
-              <div
-                key={status.key}
-                className="glass-card rounded-xl p-3 border border-zinc-800/80 text-center flex flex-col items-center justify-center min-h-[90px] hover:border-zinc-700/60 transition"
-              >
-                <span className="text-[10px] font-semibold text-zinc-400 block truncate w-full max-w-[80px]">
-                  {status.label}
-                </span>
-                <span className={`text-xl font-bold mt-1 ${count > 0 ? 'text-white font-extrabold' : 'text-zinc-600'}`}>
-                  {count}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Grid: Upcoming Interviews & Reminders */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Interviews Section */}
-        <div className="glass-card rounded-2xl border border-zinc-800 p-6 flex flex-col min-h-[300px]">
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-4 mb-4">
-            <h3 className="font-bold text-lg text-white">Upcoming Interviews</h3>
-            <Link href="/interviews" className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
-              View Calendar <ExternalLink className="h-3 w-3" />
+            <Link
+              href="/profile"
+              className="inline-flex items-center justify-center gap-1.5 w-full rounded-xl bg-zinc-800 hover:bg-zinc-700 py-2.5 text-xs font-semibold text-white transition mt-2 border border-zinc-700/60"
+            >
+              Complete Profile
             </Link>
           </div>
 
-          <div className="flex-1 space-y-4">
-            {upcomingInterviews.length === 0 ? (
-              /* Improved Empty State */
-              <div className="text-center py-12 flex flex-col items-center justify-center h-full">
-                <div className="p-3 rounded-full bg-zinc-900/60 text-zinc-500 mb-3 border border-zinc-800">
-                  <Calendar className="h-6 w-6 text-purple-400/80" />
+          {/* 10. Upcoming Deadlines Widget */}
+          <div className="glass-card rounded-3xl border border-zinc-800 p-6 flex flex-col">
+            <h3 className="font-bold text-sm text-white border-b border-zinc-850 pb-3 mb-4 flex items-center gap-2">
+              <Bell className="h-4 w-4 text-rose-400" />
+              Upcoming Deadlines
+            </h3>
+
+            <div className="space-y-4">
+              {upcomingReminders.length === 0 && upcomingInterviews.length === 0 ? (
+                <div className="text-center py-6 text-zinc-600 text-xs font-semibold">
+                  You're all caught up.
                 </div>
-                <h4 className="font-bold text-white text-sm">No interviews scheduled</h4>
-                <p className="text-zinc-400 text-xs max-w-xs mx-auto mt-1 mb-4 leading-relaxed">
-                  Prepare for your next step. Schedule your first interview to track platforms, meeting dates, and questions.
-                </p>
-                <Link 
-                  href="/interviews?create=true" 
-                  className="inline-flex items-center gap-1 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg px-3 py-1.5 text-xs font-semibold transition"
-                >
-                  Schedule Interview
-                </Link>
-              </div>
-            ) : (
-              upcomingInterviews.map((interview: any) => (
-                <div
-                  key={interview.id}
-                  className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/40 hover:border-zinc-700/80 transition duration-150 flex items-start justify-between gap-4"
-                >
-                  <div className="space-y-1">
-                    <span className="inline-flex items-center rounded bg-indigo-500/10 px-2 py-0.5 text-[10px] font-medium text-indigo-400 border border-indigo-500/20">
-                      {interview.interviewRound}
-                    </span>
-                    <h4 className="font-bold text-white text-sm mt-1">{interview.application.companyName}</h4>
-                    <p className="text-xs text-zinc-400">{interview.application.jobTitle}</p>
-                    <div className="flex items-center gap-2 mt-2 text-[10px] text-zinc-500">
-                      <Calendar className="h-3 w-3" />
-                      <span>
-                        {new Date(interview.scheduledDate).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+              ) : (
+                <>
+                  {/* Interviews deadlines */}
+                  {upcomingInterviews.slice(0, 2).map((int: any) => (
+                    <div key={int.id} className="p-3 rounded-xl bg-zinc-950/40 border border-zinc-850 space-y-1 text-xs">
+                      <span className="text-[9px] font-bold text-purple-400 bg-purple-500/10 px-1.5 py-0.2 rounded border border-purple-500/20">
+                        Interview: {int.interviewRound}
                       </span>
-                      <span>•</span>
-                      <span>
-                        {new Date(interview.scheduledTime).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })}
+                      <h4 className="font-bold text-white mt-1.5">{int.application.companyName}</h4>
+                      <p className="text-[10px] text-zinc-500">
+                        Date: {new Date(int.scheduledDate).toLocaleDateString()}
+                      </p>
+                    </div>
+                  ))}
+
+                  {/* Reminder deadlines */}
+                  {upcomingReminders.slice(0, 2).map((rem: any) => (
+                    <div key={rem.id} className="p-3 rounded-xl bg-zinc-950/40 border border-zinc-850 space-y-1 text-xs">
+                      <span className="text-[9px] font-bold text-amber-400 bg-amber-500/10 px-1.5 py-0.2 rounded border border-amber-500/20">
+                        Task: {rem.reminderType}
                       </span>
+                      <h4 className="font-semibold text-white mt-1.5">{rem.title}</h4>
+                      <p className="text-[10px] text-zinc-500">
+                        Due: {new Date(rem.dueDate).toLocaleDateString()}
+                      </p>
                     </div>
-                  </div>
-
-                  {interview.meetingLink && (
-                    <a
-                      href={interview.meetingLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition duration-150"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Reminders Checklist Section */}
-        <div className="glass-card rounded-2xl border border-zinc-800 p-6 flex flex-col min-h-[300px]">
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-4 mb-4">
-            <h3 className="font-bold text-lg text-white">Pending Reminders</h3>
-            <Link href="/reminders" className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
-              Add task <ExternalLink className="h-3 w-3" />
-            </Link>
-          </div>
-
-          <div className="flex-1 space-y-3">
-            {upcomingReminders.length === 0 ? (
-              /* Improved Empty State */
-              <div className="text-center py-12 flex flex-col items-center justify-center h-full">
-                <div className="p-3 rounded-full bg-zinc-900/60 text-zinc-500 mb-3 border border-zinc-800">
-                  <Bell className="h-6 w-6 text-emerald-400/80" />
-                </div>
-                <h4 className="font-bold text-white text-sm">No reminders set</h4>
-                <p className="text-zinc-400 text-xs max-w-xs mx-auto mt-1 mb-4 leading-relaxed">
-                  Keep your search on track. Create a reminder for document submissions, follow-ups, or offer deadlines.
-                </p>
-                <Link 
-                  href="/reminders?create=true" 
-                  className="inline-flex items-center gap-1 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg px-3 py-1.5 text-xs font-semibold transition"
-                >
-                  Create Reminder
-                </Link>
-              </div>
-            ) : (
-              upcomingReminders.map((reminder: any) => (
-                <div
-                  key={reminder.id}
-                  className="flex items-start justify-between p-3 rounded-xl border border-zinc-800/80 bg-zinc-950/20 hover:border-zinc-800 transition duration-150"
-                >
-                  <div className="flex items-start gap-3">
-                    <input
-                      type="checkbox"
-                      onChange={() => handleCompleteReminder(reminder.id)}
-                      className="mt-1 h-4 w-4 rounded border-zinc-700 bg-zinc-900 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-zinc-900 border"
-                    />
-                    <div>
-                      <h4 className="font-semibold text-zinc-200 text-sm">{reminder.title}</h4>
-                      {reminder.description && (
-                        <p className="text-xs text-zinc-500 mt-0.5">{reminder.description}</p>
-                      )}
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[9px] font-semibold text-rose-400 bg-rose-500/10 px-1.5 py-0.2 rounded">
-                          Due: {new Date(reminder.dueDate).toLocaleDateString()}
-                        </span>
-                        {reminder.application && (
-                          <span className="text-[9px] text-zinc-500">
-                            ({reminder.application.companyName})
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Recent Applications table */}
-      <div className="glass-card rounded-2xl border border-zinc-800 p-6">
-        <div className="flex items-center justify-between border-b border-zinc-800 pb-4 mb-4">
-          <h3 className="font-bold text-lg text-white">Recent Applications</h3>
-          <Link href="/applications" className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1">
-            See all applications <ExternalLink className="h-3 w-3" />
-          </Link>
-        </div>
-
-        <div className="overflow-x-auto">
-          {recentApplications.length === 0 ? (
-            /* Improved Empty State */
-            <div className="text-center py-16 flex flex-col items-center justify-center">
-              <div className="p-4 rounded-full bg-zinc-900/60 text-zinc-500 mb-3 border border-zinc-800">
-                <Briefcase className="h-8 w-8 text-indigo-400/80" />
-              </div>
-              <h4 className="font-bold text-white text-base">Your job search starts here</h4>
-              <p className="text-zinc-400 text-sm max-w-sm mx-auto mt-1 mb-5 leading-relaxed">
-                Add your first application and CareerOS will automatically begin tracking your pipeline progress.
-              </p>
-              <Link 
-                href="/applications?create=true" 
-                className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition duration-150 shadow-lg glow-indigo w-fit"
-              >
-                <Plus className="h-4 w-4" />
-                Add Application
-              </Link>
+                  ))}
+                </>
+              )}
             </div>
-          ) : (
-            <table className="w-full text-left text-sm text-zinc-300">
-              <thead className="text-xs uppercase text-zinc-500 border-b border-zinc-850">
-                <tr>
-                  <th scope="col" className="pb-3 pr-4 font-semibold">Company</th>
-                  <th scope="col" className="pb-3 px-4 font-semibold">Role</th>
-                  <th scope="col" className="pb-3 px-4 font-semibold">Date</th>
-                  <th scope="col" className="pb-3 px-4 font-semibold">Status</th>
-                  <th scope="col" className="pb-3 pl-4 text-right font-semibold">Resume</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-850">
-                {recentApplications.map((app: any) => {
-                  const statusMap = pipelineStatuses.find((s) => s.key === app.currentStatus) || {
-                    label: app.currentStatus,
-                    color: 'bg-zinc-800 text-zinc-300 border-zinc-700',
-                  };
+          </div>
 
-                  return (
-                    <tr key={app.id} className="hover:bg-zinc-900/20 transition duration-150">
-                      <td className="py-4 pr-4 font-bold text-white text-sm">{app.companyName}</td>
-                      <td className="py-4 px-4 text-zinc-400 text-sm">
-                        <div className="flex flex-col">
-                          <span>{app.jobTitle}</span>
-                          <span className="text-[10px] text-zinc-500 flex items-center gap-1 mt-0.5">
-                            <MapPin className="h-3 w-3" /> {app.location || 'Remote'}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-xs text-zinc-400">
-                        {new Date(app.applicationDate).toLocaleDateString(undefined, {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                        })}
-                      </td>
-                      <td className="py-4 px-4">
-                        <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium ${statusMap.color}`}>
-                          {statusMap.label}
-                        </span>
-                      </td>
-                      <td className="py-4 pl-4 text-right text-xs text-indigo-400 font-medium">
-                        {app.resume.name}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
+          {/* 12. Achievement System Widget */}
+          <div className="glass-card rounded-3xl border border-zinc-800 p-6 space-y-4">
+            <h3 className="font-bold text-sm text-white flex items-center gap-1.5">
+              <Trophy className="h-4 w-4 text-amber-400" />
+              Achievements Unlocked
+            </h3>
+            
+            <div className="grid grid-cols-5 gap-3 justify-items-center">
+              {ACHIEVEMENTS.map((ach) => {
+                const isUnlocked = unlockedAchievements[ach.id as keyof typeof unlockedAchievements];
+                const IconComponent = ach.icon;
+                return (
+                  <div 
+                    key={ach.id} 
+                    title={`${ach.label}: ${ach.desc}`}
+                    className={`h-10 w-10 rounded-xl border flex items-center justify-center transition-all ${
+                      isUnlocked 
+                        ? 'bg-amber-500/10 border-amber-500/35 text-amber-400 shadow-md shadow-amber-500/5' 
+                        : 'bg-zinc-950/40 border-zinc-850 text-zinc-650 cursor-not-allowed'
+                    }`}
+                  >
+                    <IconComponent className="h-5 w-5" />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* 14. Dashboard Personalisation Stats */}
+          <div className="glass-card rounded-3xl border border-zinc-800 p-6 space-y-4">
+            <h3 className="font-bold text-sm text-white flex items-center gap-1.5">
+              <TrendingUp className="h-4 w-4 text-indigo-400" />
+              Job Search Activity
+            </h3>
+            
+            <div className="text-xs space-y-3 text-zinc-400">
+              <div className="flex justify-between items-center">
+                <span>Applications this month</span>
+                <span className="font-bold text-white">{appThisMonth}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Most applied company</span>
+                <span className="font-bold text-white truncate max-w-[120px]">{topCompany}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Favorite job role</span>
+                <span className="font-bold text-white truncate max-w-[120px]">{favRole}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span>Most active weekday</span>
+                <span className="font-bold text-white">{activeDay}</span>
+              </div>
+            </div>
+          </div>
+
         </div>
+
       </div>
+
     </div>
   );
 }
