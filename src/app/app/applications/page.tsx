@@ -29,14 +29,14 @@ import useResumeStore from '../../../hooks/useResumeStore';
 import useInterviewStore from '../../../hooks/useInterviewStore';
 
 const PIPELINE_COLUMNS = [
-  { key: 'Wishlist', label: 'Wishlist', color: 'border-zinc-800' },
+  { key: 'Wishlist', label: 'Wishlist', color: 'border-gray-200' },
   { key: 'Preparing', label: 'Preparing', color: 'border-orange-500/20' },
-  { key: 'Applied', label: 'Applied', color: 'border-indigo-500/20' },
-  { key: 'OnlineAssessment', label: 'OA Exam', color: 'border-cyan-500/20' },
-  { key: 'TechnicalInterview', label: 'Technical', color: 'border-purple-500/20' },
-  { key: 'HRInterview', label: 'HR Round', color: 'border-fuchsia-500/20' },
+  { key: 'Applied', label: 'Applied', color: 'border-indigo-600/20' },
+  { key: 'OnlineAssessment', label: 'OA Exam', color: 'border-cyan-600/20' },
+  { key: 'TechnicalInterview', label: 'Technical', color: 'border-purple-600/20' },
+  { key: 'HRInterview', label: 'HR Round', color: 'border-fuchsia-600/20' },
   { key: 'FinalInterview', label: 'Finals', color: 'border-pink-500/20' },
-  { key: 'OfferReceived', label: 'Offer', color: 'border-emerald-500/20 glow-emerald' },
+  { key: 'OfferReceived', label: 'Offer', color: 'border-emerald-600/20 glow-emerald' },
 ];
 
 function ApplicationsContent() {
@@ -281,13 +281,13 @@ function ApplicationsContent() {
   return (
     <div className="space-y-6">
       {/* Search and Filters Header */}
-      <div className="bg-zinc-900/30 backdrop-blur border border-zinc-800/80 p-4 rounded-2xl space-y-3">
+      <div className="bg-white backdrop-blur border border-gray-200/80 p-4 rounded-2xl space-y-3">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           
           {/* Search field with suggestions */}
           <div className="flex-1 relative" ref={suggestionRef}>
             <div className="relative">
-              <Search className="absolute left-3 top-3.5 h-4 w-4 text-zinc-500" />
+              <Search className="absolute left-3 top-3.5 h-4 w-4 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search by company, title, location, notes..."
@@ -297,12 +297,12 @@ function ApplicationsContent() {
                   setShowSuggestions(true);
                 }}
                 onFocus={() => setShowSuggestions(true)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-zinc-800 bg-zinc-950/80 text-white placeholder-zinc-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 text-sm"
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white/80 text-gray-900 placeholder-zinc-500 focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600 text-sm"
               />
             </div>
             
             {showSuggestions && suggestions.length > 0 && (
-              <div className="absolute left-0 right-0 mt-1.5 rounded-xl border border-zinc-800 bg-zinc-950 text-sm overflow-hidden z-20 shadow-2xl">
+              <div className="absolute left-0 right-0 mt-1.5 rounded-xl border border-gray-200 bg-white text-sm overflow-hidden z-20 shadow-2xl">
                 {suggestions.map((c) => (
                   <button
                     key={c}
@@ -310,9 +310,9 @@ function ApplicationsContent() {
                       setSearch(c);
                       setShowSuggestions(false);
                     }}
-                    className="w-full text-left px-4 py-2.5 text-zinc-300 hover:bg-zinc-900 hover:text-white transition"
+                    className="w-full text-left px-4 py-2.5 text-gray-600 hover:bg-white hover:text-gray-900 transition"
                   >
-                    Suggest company: <span className="font-bold text-white">{c}</span>
+                    Suggest company: <span className="font-bold text-gray-900">{c}</span>
                   </button>
                 ))}
               </div>
@@ -322,7 +322,7 @@ function ApplicationsContent() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setShowFiltersMobile(!showFiltersMobile)}
-              className="lg:hidden flex items-center justify-center gap-1.5 border border-zinc-800 rounded-xl bg-zinc-950/80 px-4 py-3 text-sm font-semibold text-zinc-300 hover:text-white transition"
+              className="lg:hidden flex items-center justify-center gap-1.5 border border-gray-200 rounded-xl bg-white/80 px-4 py-3 text-sm font-semibold text-gray-600 hover:text-gray-900 transition"
             >
               <SlidersHorizontal className="h-4 w-4" />
               Filters
@@ -330,7 +330,7 @@ function ApplicationsContent() {
 
             <button
               onClick={() => setIsCreateOpen(true)}
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-white hover:bg-indigo-500 transition duration-150 shadow-lg glow-indigo w-full sm:w-auto cursor-pointer"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-semibold text-gray-900 hover:bg-indigo-600 transition duration-150 shadow-lg glow-indigo w-full sm:w-auto cursor-pointer"
             >
               <Plus className="h-4 w-4" />
               Add Application
@@ -339,13 +339,13 @@ function ApplicationsContent() {
         </div>
 
         {/* Collapsible expanded filter row */}
-        <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-2 border-t border-zinc-800/40 lg:grid ${showFiltersMobile ? 'grid' : 'hidden lg:grid'}`}>
+        <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-2 border-t border-gray-200/40 lg:grid ${showFiltersMobile ? 'grid' : 'hidden lg:grid'}`}>
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider pl-1">Job Type</span>
+            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider pl-1">Job Type</span>
             <select
               value={jobType}
               onChange={(e) => setJobType(e.target.value)}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-955 text-zinc-300 px-3 py-2.5 focus:border-indigo-500 focus:outline-none text-xs cursor-pointer"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 text-gray-600 px-3 py-2.5 focus:border-indigo-600 focus:outline-none text-xs cursor-pointer"
             >
               <option value="">All Job Types</option>
               <option value="FullTime">Full Time</option>
@@ -357,11 +357,11 @@ function ApplicationsContent() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider pl-1">Work Mode</span>
+            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider pl-1">Work Mode</span>
             <select
               value={workMode}
               onChange={(e) => setWorkMode(e.target.value)}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-955 text-zinc-300 px-3 py-2.5 focus:border-indigo-500 focus:outline-none text-xs cursor-pointer"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 text-gray-600 px-3 py-2.5 focus:border-indigo-600 focus:outline-none text-xs cursor-pointer"
             >
               <option value="">All Work Modes</option>
               <option value="Remote">Remote</option>
@@ -371,11 +371,11 @@ function ApplicationsContent() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider pl-1">Origin / Source</span>
+            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider pl-1">Origin / Source</span>
             <select
               value={source}
               onChange={(e) => setSource(e.target.value)}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-955 text-zinc-300 px-3 py-2.5 focus:border-indigo-500 focus:outline-none text-xs cursor-pointer"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 text-gray-600 px-3 py-2.5 focus:border-indigo-600 focus:outline-none text-xs cursor-pointer"
             >
               <option value="">All Origins</option>
               <option value="Referral">Referral Only</option>
@@ -384,11 +384,11 @@ function ApplicationsContent() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider pl-1">Sort By</span>
+            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider pl-1">Sort By</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-955 text-zinc-300 px-3 py-2.5 focus:border-indigo-500 focus:outline-none text-xs cursor-pointer"
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 text-gray-600 px-3 py-2.5 focus:border-indigo-600 focus:outline-none text-xs cursor-pointer"
             >
               <option value="Newest">Newest First</option>
               <option value="Oldest">Oldest First</option>
@@ -402,15 +402,15 @@ function ApplicationsContent() {
 
       {/* 8. Better Empty States */}
       {sortedApps.length === 0 ? (
-        <div className="glass-card rounded-3xl border border-dashed border-zinc-800 p-16 text-center max-w-xl mx-auto mt-12 animate-fade-in">
-          <Briefcase className="h-12 w-12 text-indigo-400 mx-auto mb-4" />
-          <h3 className="font-bold text-white text-lg">You haven't started your job search yet</h3>
-          <p className="text-zinc-400 text-sm mt-1.5 mb-6 max-w-sm mx-auto leading-relaxed">
+        <div className="bg-white shadow-sm border border-gray-200 rounded-3xl border border-dashed border-gray-200 p-16 text-center max-w-xl mx-auto mt-12 animate-fade-in">
+          <Briefcase className="h-12 w-12 text-indigo-600 mx-auto mb-4" />
+          <h3 className="font-bold text-gray-900 text-lg">You haven't started your job search yet</h3>
+          <p className="text-gray-500 text-sm mt-1.5 mb-6 max-w-sm mx-auto leading-relaxed">
             Add your first application and CareerOS will automatically begin tracking your pipeline.
           </p>
           <button
             onClick={() => setIsCreateOpen(true)}
-            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 transition duration-150 shadow-lg glow-indigo w-fit mx-auto cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-gray-900 hover:bg-indigo-600 transition duration-150 shadow-lg glow-indigo w-fit mx-auto cursor-pointer"
           >
             <Plus className="h-4 w-4" /> Add Application
           </button>
@@ -422,11 +422,11 @@ function ApplicationsContent() {
             {PIPELINE_COLUMNS.map((column) => {
               const columnApps = sortedApps.filter((app) => app.currentStatus === column.key);
               return (
-                <div key={column.key} className="flex-1 min-w-[310px] bg-zinc-900/10 rounded-2xl border border-zinc-900 p-3 flex flex-col min-h-[65vh]">
+                <div key={column.key} className="flex-1 min-w-[310px] bg-white/10 rounded-2xl border border-gray-200 p-3 flex flex-col min-h-[65vh]">
                   {/* Column Header */}
                   <div className={`flex items-center justify-between border-b pb-2.5 mb-4 ${column.color}`}>
-                    <span className="font-bold text-sm text-zinc-200">{column.label}</span>
-                    <span className="h-5 w-5 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center text-[10px] text-zinc-400 font-bold">
+                    <span className="font-bold text-sm text-gray-700">{column.label}</span>
+                    <span className="h-5 w-5 rounded-full bg-white border border-gray-200 flex items-center justify-center text-[10px] text-gray-500 font-bold">
                       {columnApps.length}
                     </span>
                   </div>
@@ -434,7 +434,7 @@ function ApplicationsContent() {
                   {/* 1. Improved Kanban Cards with hover translate and rich fields */}
                   <div className="flex-1 space-y-3 overflow-y-auto max-h-[62vh] scrollbar-thin">
                     {columnApps.length === 0 ? (
-                      <div className="h-16 border border-dashed border-zinc-800/60 rounded-xl flex items-center justify-center text-[11px] text-zinc-650">
+                      <div className="h-16 border border-dashed border-gray-200/60 rounded-xl flex items-center justify-center text-[11px] text-gray-400">
                         Drag applications here
                       </div>
                     ) : (
@@ -442,66 +442,66 @@ function ApplicationsContent() {
                         <div
                           key={app.id}
                           onClick={() => handleOpenDetail(app)}
-                          className="p-4 rounded-xl border border-zinc-800 bg-zinc-900/40 hover:border-zinc-700/80 hover:bg-zinc-900/80 hover:-translate-y-1 hover:shadow-lg transition duration-200 cursor-pointer flex flex-col gap-3.5 group relative"
+                          className="p-4 rounded-xl border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 hover:-translate-y-1 hover:shadow-lg transition duration-200 cursor-pointer flex flex-col gap-3.5 group relative"
                         >
                           {/* Header: Logo placeholder & Company name */}
                           <div className="flex items-start gap-3">
-                            <div className="h-8 w-8 rounded-lg bg-zinc-800 text-zinc-300 border border-zinc-700/50 flex items-center justify-center font-extrabold text-sm shrink-0 uppercase">
+                            <div className="h-8 w-8 rounded-lg bg-gray-100 text-gray-600 border border-gray-300/50 flex items-center justify-center font-extrabold text-sm shrink-0 uppercase">
                               {app.companyName.charAt(0)}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <h4 className="font-bold text-white text-xs group-hover:text-indigo-400 transition duration-150 truncate">
+                              <h4 className="font-bold text-gray-900 text-xs group-hover:text-indigo-600 transition duration-150 truncate">
                                 {app.companyName}
                               </h4>
-                              <p className="text-[10px] text-zinc-400 truncate">{app.jobTitle}</p>
+                              <p className="text-[10px] text-gray-500 truncate">{app.jobTitle}</p>
                             </div>
                           </div>
 
                           {/* Expanded Fields */}
-                          <div className="text-[10px] space-y-1.5 border-t border-zinc-800/40 pt-2.5">
-                            <div className="flex justify-between items-center text-zinc-500">
+                          <div className="text-[10px] space-y-1.5 border-t border-gray-200/40 pt-2.5">
+                            <div className="flex justify-between items-center text-gray-400">
                               <span>Location & Mode</span>
-                              <span className="text-zinc-300 font-medium truncate max-w-[120px]">
+                              <span className="text-gray-600 font-medium truncate max-w-[120px]">
                                 {app.location || 'Remote'} ({app.workMode})
                               </span>
                             </div>
 
-                            <div className="flex justify-between items-center text-zinc-500">
+                            <div className="flex justify-between items-center text-gray-400">
                               <span>Job Type</span>
-                              <span className="text-zinc-300 font-medium">
+                              <span className="text-gray-600 font-medium">
                                 {app.jobType === 'FullTime' ? 'Full-time' : app.jobType}
                               </span>
                             </div>
 
                             {app.salary && (
-                              <div className="flex justify-between items-center text-zinc-500">
+                              <div className="flex justify-between items-center text-gray-400">
                                 <span>Salary</span>
-                                <span className="text-emerald-400 font-semibold">
+                                <span className="text-emerald-600 font-semibold">
                                   {parseFloat(app.salary.toString()).toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}
                                 </span>
                               </div>
                             )}
 
                             {app.resume && (
-                              <div className="flex justify-between items-center text-zinc-500">
+                              <div className="flex justify-between items-center text-gray-400">
                                 <span>Resume Version</span>
-                                <span className="text-indigo-400 truncate max-w-[120px]" title={app.resume.name}>
+                                <span className="text-indigo-600 truncate max-w-[120px]" title={app.resume.name}>
                                   {app.resume.name}
                                 </span>
                               </div>
                             )}
 
-                            <div className="flex justify-between items-center text-zinc-500">
+                            <div className="flex justify-between items-center text-gray-400">
                               <span>Applied On</span>
-                              <span className="text-zinc-400">
+                              <span className="text-gray-500">
                                 {new Date(app.applicationDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                               </span>
                             </div>
                           </div>
 
                           {/* Quick Actions Footer */}
-                          <div className="flex items-center justify-between border-t border-zinc-800/40 pt-2.5 mt-0.5 gap-2">
-                            <span className="inline-flex items-center rounded-full bg-zinc-800 border border-zinc-700/60 px-2 py-0.5 text-[8px] font-semibold text-zinc-400 uppercase">
+                          <div className="flex items-center justify-between border-t border-gray-200/40 pt-2.5 mt-0.5 gap-2">
+                            <span className="inline-flex items-center rounded-full bg-gray-100 border border-gray-300/60 px-2 py-0.5 text-[8px] font-semibold text-gray-500 uppercase">
                               {app.currentStatus}
                             </span>
 
@@ -512,7 +512,7 @@ function ApplicationsContent() {
                                   e.stopPropagation();
                                   handleOpenDetail(app);
                                 }}
-                                className="p-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition"
+                                className="p-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 transition"
                               >
                                 <Settings className="h-3 w-3" />
                               </button>
@@ -523,7 +523,7 @@ function ApplicationsContent() {
                                   setSelectedApp(app);
                                   setIsScheduleOpen(true);
                                 }}
-                                className="p-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition"
+                                className="p-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 transition"
                               >
                                 <CalendarRange className="h-3 w-3" />
                               </button>
@@ -533,7 +533,7 @@ function ApplicationsContent() {
                                   e.stopPropagation();
                                   handleDeleteApp(app.id);
                                 }}
-                                className="p-1 rounded bg-rose-950/20 hover:bg-rose-900/40 text-rose-400 transition"
+                                className="p-1 rounded bg-rose-950/20 hover:bg-rose-900/40 text-rose-600 transition"
                               >
                                 <Trash2 className="h-3 w-3" />
                               </button>
@@ -553,53 +553,53 @@ function ApplicationsContent() {
       {/* CREATE MODAL */}
       {isCreateOpen && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 space-y-6">
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-              <h3 className="font-bold text-lg text-white">Add Job Application</h3>
-              <button onClick={() => setIsCreateOpen(false)} className="text-zinc-400 hover:text-white">
+          <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 space-y-6">
+            <div className="flex items-center justify-between border-b border-gray-200 pb-3">
+              <h3 className="font-bold text-lg text-gray-900">Add Job Application</h3>
+              <button onClick={() => setIsCreateOpen(false)} className="text-gray-500 hover:text-gray-900">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit(handleCreateSubmit)} className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Company Name</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Company Name</label>
                 <input
                   type="text"
                   required
                   {...register('companyName', { required: true })}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600"
                   placeholder="e.g. Google"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Job Title</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Job Title</label>
                 <input
                   type="text"
                   required
                   {...register('jobTitle', { required: true })}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600"
                   placeholder="e.g. Software Engineer"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Department</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Department</label>
                 <input
                   type="text"
                   {...register('department')}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-955 text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600"
                   placeholder="e.g. Cloud Team"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Job Type</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Job Type</label>
                 <select
                   required
                   {...register('jobType', { required: true })}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-300 focus:border-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-600 focus:border-indigo-600 focus:outline-none"
                 >
                   <option value="FullTime">Full Time</option>
                   <option value="Internship">Internship</option>
@@ -610,11 +610,11 @@ function ApplicationsContent() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Work Mode</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Work Mode</label>
                 <select
                   required
                   {...register('workMode', { required: true })}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-955 text-zinc-300 focus:border-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-600 focus:border-indigo-600 focus:outline-none"
                 >
                   <option value="Remote">Remote</option>
                   <option value="Hybrid">Hybrid</option>
@@ -623,53 +623,53 @@ function ApplicationsContent() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Location</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Location</label>
                 <input
                   type="text"
                   {...register('location')}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none focus:ring-1 focus:ring-indigo-600"
                   placeholder="e.g. Bangalore"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Application Date</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Application Date</label>
                 <input
                   type="date"
                   required
                   defaultValue={new Date().toISOString().split('T')[0]}
                   {...register('applicationDate', { required: true })}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-300 focus:border-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-600 focus:border-indigo-600 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Source / Referral</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Source / Referral</label>
                 <input
                   type="text"
                   required
                   {...register('source', { required: true })}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-white focus:border-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                   placeholder="e.g. LinkedIn, Referral"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Salary (Annual, INR)</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Salary (Annual, INR)</label>
                 <input
                   type="number"
                   {...register('salary')}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-white focus:border-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                   placeholder="e.g. 1200000"
                 />
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Link Resume</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Link Resume</label>
                 <select
                   required
                   {...register('resumeId', { required: true })}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-955 text-zinc-300 focus:border-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-600 focus:border-indigo-600 focus:outline-none"
                 >
                   <option value="">Select a Resume</option>
                   {resumes.map((r) => (
@@ -679,18 +679,18 @@ function ApplicationsContent() {
                   ))}
                 </select>
                 {resumes.length === 0 && (
-                  <p className="text-[10px] text-amber-500 mt-1">
+                  <p className="text-[10px] text-amber-600 mt-1">
                     No Resumes found. Please upload a Resume in the Resumes page first.
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Initial Status</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Initial Status</label>
                 <select
                   required
                   {...register('currentStatus', { required: true })}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-300 focus:border-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-600 focus:border-indigo-600 focus:outline-none"
                 >
                   <option value="Wishlist">Wishlist</option>
                   <option value="Preparing">Preparing</option>
@@ -704,54 +704,54 @@ function ApplicationsContent() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Job URL</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Job URL</label>
                 <input
                   type="text"
                   {...register('jobUrl')}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-955 text-white focus:border-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 focus:border-indigo-600 focus:outline-none"
                   placeholder="e.g. https://careers.google.com/jobs"
                 />
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Recruiter Contact Info</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Recruiter Contact Info</label>
                 <div className="grid grid-cols-2 gap-3">
                   <input
                     type="text"
                     {...register('recruiterName')}
                     placeholder="Name (e.g. Jane)"
-                    className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-white focus:border-indigo-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                   />
                   <input
                     type="email"
                     {...register('recruiterEmail')}
                     placeholder="Email (e.g. jane@company.com)"
-                    className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-955 text-white focus:border-indigo-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 focus:border-indigo-600 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Notes</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Notes</label>
                 <textarea
                   rows={3}
                   {...register('notes')}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-white focus:border-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                   placeholder="Paste description or write application notes..."
                 />
               </div>
 
-              <div className="sm:col-span-2 flex justify-end gap-3 pt-4 border-t border-zinc-800">
+              <div className="sm:col-span-2 flex justify-end gap-3 pt-4 border-t border-gray-200">
                 <button
                   type="button"
                   onClick={() => setIsCreateOpen(false)}
-                  className="px-4 py-2 rounded-lg bg-zinc-850 hover:bg-zinc-750 text-zinc-300 font-semibold"
+                  className="px-4 py-2 rounded-lg bg-zinc-850 hover:bg-zinc-750 text-gray-600 font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold shadow-lg glow-indigo"
+                  className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-600 text-gray-900 font-semibold shadow-lg glow-indigo"
                 >
                   Save Application
                 </button>
@@ -764,14 +764,14 @@ function ApplicationsContent() {
       {/* DETAILS DRAWER / DRAWER DIALOG */}
       {isDetailOpen && selectedApp && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-end z-50">
-          <div className="bg-zinc-900 border-l border-zinc-800 w-full max-w-lg h-full flex flex-col p-6 space-y-6 overflow-y-auto animate-slide-in">
+          <div className="bg-white border-l border-gray-200 w-full max-w-lg h-full flex flex-col p-6 space-y-6 overflow-y-auto animate-slide-in">
             {/* Header */}
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+            <div className="flex items-center justify-between border-b border-gray-200 pb-3">
               <div>
-                <h3 className="font-bold text-xl text-white">{selectedApp.companyName}</h3>
-                <p className="text-sm text-zinc-400 mt-0.5">{selectedApp.jobTitle}</p>
+                <h3 className="font-bold text-xl text-gray-900">{selectedApp.companyName}</h3>
+                <p className="text-sm text-gray-500 mt-0.5">{selectedApp.jobTitle}</p>
               </div>
-              <button onClick={() => setIsDetailOpen(false)} className="text-zinc-400 hover:text-white cursor-pointer">
+              <button onClick={() => setIsDetailOpen(false)} className="text-gray-500 hover:text-gray-900 cursor-pointer">
                 <X className="h-6 w-6" />
               </button>
             </div>
@@ -780,21 +780,21 @@ function ApplicationsContent() {
             <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => setIsStatusEditOpen(true)}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-zinc-805 bg-zinc-800/40 hover:bg-zinc-800/80 px-2 py-2 text-xs font-semibold text-white transition cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-zinc-805 bg-gray-100/40 hover:bg-gray-100/80 px-2 py-2 text-xs font-semibold text-gray-900 transition cursor-pointer"
               >
                 <Settings className="h-3.5 w-3.5" />
                 Change Status
               </button>
               <button
                 onClick={() => setIsScheduleOpen(true)}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-indigo-500/20 bg-indigo-600/10 hover:bg-indigo-600/20 px-2 py-2 text-xs font-semibold text-indigo-400 transition cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-indigo-600/20 bg-indigo-600/10 hover:bg-indigo-600/20 px-2 py-2 text-xs font-semibold text-indigo-600 transition cursor-pointer"
               >
                 <CalendarRange className="h-3.5 w-3.5" />
                 Schedule Round
               </button>
               <button
                 onClick={() => handleDeleteApp(selectedApp.id)}
-                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-rose-500/20 bg-rose-500/10 hover:bg-rose-500/20 px-2 py-2 text-xs font-semibold text-rose-400 transition cursor-pointer"
+                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-rose-600/20 bg-rose-600/10 hover:bg-rose-600/20 px-2 py-2 text-xs font-semibold text-rose-600 transition cursor-pointer"
               >
                 <Trash2 className="h-3.5 w-3.5" />
                 Delete
@@ -802,47 +802,47 @@ function ApplicationsContent() {
             </div>
 
             {/* Metadata Fields */}
-            <div className="space-y-4 text-sm bg-zinc-955/40 border border-zinc-850 p-4 rounded-xl">
+            <div className="space-y-4 text-sm bg-gray-50/40 border border-gray-100 p-4 rounded-xl">
               <div className="grid grid-cols-2 gap-x-4 gap-y-3">
                 <div>
-                  <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider block">Job Type</span>
-                  <span className="text-zinc-300 font-medium">{selectedApp.jobType}</span>
+                  <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block">Job Type</span>
+                  <span className="text-gray-600 font-medium">{selectedApp.jobType}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider block">Work Mode</span>
-                  <span className="text-zinc-300 font-medium">{selectedApp.workMode}</span>
+                  <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block">Work Mode</span>
+                  <span className="text-gray-600 font-medium">{selectedApp.workMode}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider block">Location</span>
-                  <span className="text-zinc-300 font-medium flex items-center gap-1 mt-0.5">
-                    <MapPin className="h-3.5 w-3.5 text-zinc-500" /> {selectedApp.location || 'Remote'}
+                  <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block">Location</span>
+                  <span className="text-gray-600 font-medium flex items-center gap-1 mt-0.5">
+                    <MapPin className="h-3.5 w-3.5 text-gray-400" /> {selectedApp.location || 'Remote'}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider block">Applied Date</span>
-                  <span className="text-zinc-300 font-medium">
+                  <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block">Applied Date</span>
+                  <span className="text-gray-600 font-medium">
                     {new Date(selectedApp.applicationDate).toLocaleDateString()}
                   </span>
                 </div>
                 <div>
-                  <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider block">Source</span>
-                  <span className="text-zinc-300 font-medium">{selectedApp.source}</span>
+                  <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block">Source</span>
+                  <span className="text-gray-600 font-medium">{selectedApp.source}</span>
                 </div>
                 <div>
-                  <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider block">Salary</span>
-                  <span className="text-zinc-300 font-medium flex items-center gap-0.5">
-                    <DollarSign className="h-3.5 w-3.5 text-zinc-500" /> {selectedApp.salary ? selectedApp.salary.toString() : 'Not provided'}
+                  <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block">Salary</span>
+                  <span className="text-gray-600 font-medium flex items-center gap-0.5">
+                    <DollarSign className="h-3.5 w-3.5 text-gray-400" /> {selectedApp.salary ? selectedApp.salary.toString() : 'Not provided'}
                   </span>
                 </div>
                 {selectedApp.recruiterName && (
                   <div className="col-span-2">
-                    <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider block">Recruiter Contact</span>
-                    <span className="text-zinc-300 font-medium flex items-center gap-1.5 mt-0.5">
-                      <User className="h-3.5 w-3.5 text-zinc-500" /> {selectedApp.recruiterName} 
+                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block">Recruiter Contact</span>
+                    <span className="text-gray-600 font-medium flex items-center gap-1.5 mt-0.5">
+                      <User className="h-3.5 w-3.5 text-gray-400" /> {selectedApp.recruiterName} 
                       {selectedApp.recruiterEmail && (
                         <>
-                          <span className="text-zinc-600">|</span>
-                          <Mail className="h-3.5 w-3.5 text-zinc-500" /> {selectedApp.recruiterEmail}
+                          <span className="text-gray-400">|</span>
+                          <Mail className="h-3.5 w-3.5 text-gray-400" /> {selectedApp.recruiterEmail}
                         </>
                       )}
                     </span>
@@ -850,12 +850,12 @@ function ApplicationsContent() {
                 )}
                 {selectedApp.jobUrl && (
                   <div className="col-span-2">
-                    <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider block">Job Link</span>
+                    <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider block">Job Link</span>
                     <a
                       href={selectedApp.jobUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1 mt-0.5 truncate"
+                      className="text-indigo-600 hover:text-indigo-300 font-medium flex items-center gap-1 mt-0.5 truncate"
                     >
                       <LinkIcon className="h-3.5 w-3.5" /> {selectedApp.jobUrl}
                     </a>
@@ -867,8 +867,8 @@ function ApplicationsContent() {
             {/* Notes Section */}
             {selectedApp.notes && (
               <div className="space-y-1">
-                <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">Internal Notes</span>
-                <p className="text-sm text-zinc-300 bg-zinc-955/40 border border-zinc-850 p-3 rounded-xl whitespace-pre-wrap">
+                <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Internal Notes</span>
+                <p className="text-sm text-gray-600 bg-gray-50/40 border border-gray-100 p-3 rounded-xl whitespace-pre-wrap">
                   {selectedApp.notes}
                 </p>
               </div>
@@ -876,25 +876,25 @@ function ApplicationsContent() {
 
             {/* Status History Timeline */}
             <div className="space-y-3 flex-1 flex flex-col min-h-0">
-              <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-wider">Status History Timeline</span>
-              <div className="flex-1 overflow-y-auto border border-zinc-850 bg-zinc-950/20 p-4 rounded-xl space-y-4 max-h-[30vh]">
+              <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Status History Timeline</span>
+              <div className="flex-1 overflow-y-auto border border-gray-100 bg-white/20 p-4 rounded-xl space-y-4 max-h-[30vh]">
                 {appHistory.length === 0 ? (
-                  <div className="text-center py-6 text-xs text-zinc-650">No timeline entries.</div>
+                  <div className="text-center py-6 text-xs text-gray-400">No timeline entries.</div>
                 ) : (
                   appHistory.map((item, idx) => (
                     <div key={item.id} className="relative flex gap-3 pl-1 text-xs">
                       {idx !== appHistory.length - 1 && (
-                        <div className="absolute top-4 bottom-0 left-[5px] w-[1px] bg-zinc-800" />
+                        <div className="absolute top-4 bottom-0 left-[5px] w-[1px] bg-gray-100" />
                       )}
-                      <div className="h-2.5 w-2.5 rounded-full bg-indigo-500 mt-1 shrink-0" />
+                      <div className="h-2.5 w-2.5 rounded-full bg-indigo-600 mt-1 shrink-0" />
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-white">{item.newStatus}</span>
-                          <span className="text-[9px] text-zinc-500">
+                          <span className="font-bold text-gray-900">{item.newStatus}</span>
+                          <span className="text-[9px] text-gray-400">
                             {new Date(item.changedAt).toLocaleString()}
                           </span>
                         </div>
-                        {item.notes && <p className="text-zinc-400">{item.notes}</p>}
+                        {item.notes && <p className="text-gray-500">{item.notes}</p>}
                       </div>
                     </div>
                   ))
@@ -908,22 +908,22 @@ function ApplicationsContent() {
       {/* STATUS EDIT MODAL */}
       {isStatusEditOpen && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-              <h3 className="font-bold text-lg text-white">Update Status</h3>
-              <button onClick={() => setIsStatusEditOpen(false)} className="text-zinc-400 hover:text-white">
+          <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-200 pb-3">
+              <h3 className="font-bold text-lg text-gray-900">Update Status</h3>
+              <button onClick={() => setIsStatusEditOpen(false)} className="text-gray-500 hover:text-gray-900">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <form onSubmit={handleUpdateStatusSubmit} className="space-y-4 text-sm">
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">New Status</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">New Status</label>
                 <select
                   required
                   value={newStatus}
                   onChange={(e) => setNewStatus(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-955 text-zinc-300 focus:border-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-600 focus:border-indigo-600 focus:outline-none"
                 >
                   <option value="">Select new status</option>
                   <option value="Wishlist">Wishlist</option>
@@ -943,12 +943,12 @@ function ApplicationsContent() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Status Notes</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Status Notes</label>
                 <textarea
                   rows={2}
                   value={statusNotes}
                   onChange={(e) => setStatusNotes(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-white focus:border-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                   placeholder="e.g. Received email response from hiring manager"
                 />
               </div>
@@ -957,14 +957,14 @@ function ApplicationsContent() {
                 <button
                   type="button"
                   onClick={() => setIsStatusEditOpen(false)}
-                  className="px-4 py-2 rounded-lg bg-zinc-850 hover:bg-zinc-750 text-zinc-300 font-semibold"
+                  className="px-4 py-2 rounded-lg bg-zinc-850 hover:bg-zinc-750 text-gray-600 font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={!newStatus}
-                  className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold"
+                  className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-600 text-gray-900 font-semibold"
                 >
                   Update
                 </button>
@@ -977,35 +977,35 @@ function ApplicationsContent() {
       {/* SCHEDULE INTERVIEW MODAL */}
       {isScheduleOpen && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-              <h3 className="font-bold text-lg text-white">Schedule Interview Round</h3>
-              <button onClick={() => setIsScheduleOpen(false)} className="text-zinc-400 hover:text-white">
+          <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-200 pb-3">
+              <h3 className="font-bold text-lg text-gray-900">Schedule Interview Round</h3>
+              <button onClick={() => setIsScheduleOpen(false)} className="text-gray-500 hover:text-gray-900">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <form onSubmit={handleScheduleSubmit} className="space-y-4 text-sm max-h-[70vh] overflow-y-auto pr-1">
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1 font-bold">Round Title</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 font-bold">Round Title</label>
                 <input
                   type="text"
                   required
                   value={interviewRound}
                   onChange={(e) => setInterviewRound(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-955 text-white focus:border-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 focus:border-indigo-600 focus:outline-none"
                   placeholder="e.g. Technical Coding Round"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Type</label>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Type</label>
                   <select
                     required
                     value={interviewType}
                     onChange={(e) => setInterviewType(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-300 focus:border-indigo-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-600 focus:border-indigo-600 focus:outline-none"
                   >
                     <option value="Online">Online</option>
                     <option value="Offline">Offline</option>
@@ -1014,108 +1014,108 @@ function ApplicationsContent() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Timezone</label>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Timezone</label>
                   <input
                     type="text"
                     required
                     value={timeZone}
                     onChange={(e) => setTimeZone(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-white focus:border-indigo-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1 font-bold">Scheduled Date</label>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 font-bold">Scheduled Date</label>
                   <input
                     type="date"
                     required
                     value={scheduledDate}
                     onChange={(e) => setScheduledDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-300 focus:border-indigo-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-600 focus:border-indigo-600 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1 font-bold">Scheduled Time</label>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 font-bold">Scheduled Time</label>
                   <input
                     type="time"
                     required
                     value={scheduledTime}
                     onChange={(e) => setScheduledTime(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-zinc-300 focus:border-indigo-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-600 focus:border-indigo-600 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Platform</label>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Platform</label>
                   <input
                     type="text"
                     value={meetingPlatform}
                     onChange={(e) => setMeetingPlatform(e.target.value)}
                     placeholder="e.g. Google Meet"
-                    className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-955 text-white focus:border-indigo-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 focus:border-indigo-600 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Meeting Link</label>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Meeting Link</label>
                   <input
                     type="text"
                     value={meetingLink}
                     onChange={(e) => setMeetingLink(e.target.value)}
                     placeholder="e.g. https://meet.google.com/..."
-                    className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-white focus:border-indigo-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Interviewer Name</label>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Interviewer Name</label>
                   <input
                     type="text"
                     value={interviewerName}
                     onChange={(e) => setInterviewerName(e.target.value)}
                     placeholder="e.g. John Smith"
-                    className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-white focus:border-indigo-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Interviewer Email</label>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Interviewer Email</label>
                   <input
                     type="email"
                     value={interviewerEmail}
                     onChange={(e) => setInterviewerEmail(e.target.value)}
                     placeholder="e.g. john@company.com"
-                    className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-955 text-white focus:border-indigo-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 focus:border-indigo-600 focus:outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1">Prep Notes</label>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Prep Notes</label>
                 <textarea
                   rows={2}
                   value={preparationNotes}
                   onChange={(e) => setPreparationNotes(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-white focus:border-indigo-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                   placeholder="Key concepts to review, questions to ask..."
                 />
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-zinc-800">
+              <div className="flex justify-end gap-3 pt-3 border-t border-gray-200">
                 <button
                   type="button"
                   onClick={() => setIsScheduleOpen(false)}
-                  className="px-4 py-2 rounded-lg bg-zinc-850 hover:bg-zinc-750 text-zinc-300 font-semibold"
+                  className="px-4 py-2 rounded-lg bg-zinc-850 hover:bg-zinc-750 text-gray-600 font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold"
+                  className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-600 text-gray-900 font-semibold"
                 >
                   Schedule
                 </button>
@@ -1132,8 +1132,8 @@ export default function ApplicationsPage() {
   return (
     <Suspense fallback={
       <div className="flex h-[60vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-        <p className="text-zinc-400 text-sm ml-2">Loading applications board...</p>
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
+        <p className="text-gray-500 text-sm ml-2">Loading applications board...</p>
       </div>
     }>
       <ApplicationsContent />
