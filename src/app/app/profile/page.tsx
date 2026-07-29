@@ -177,7 +177,7 @@ export default function ProfilePage() {
                 {hasResume ? (
                   <span className="text-emerald-400 font-semibold">✓ Complete</span>
                 ) : (
-                  <Link href="/resumes" className="text-indigo-400 hover:underline">Pending &rarr;</Link>
+                  <Link href="/app/resumes" className="text-indigo-400 hover:underline">Pending &rarr;</Link>
                 )}
               </li>
               <li className="flex items-center justify-between">

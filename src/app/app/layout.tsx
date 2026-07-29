@@ -25,14 +25,14 @@ import useNotificationStore from '../../hooks/useNotificationStore';
 import { useClerk } from '@clerk/nextjs';
 
 const navigation = [
-  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Applications', href: '/applications', icon: KanbanSquare },
-  { name: 'Resumes', href: '/resumes', icon: FileText },
-  { name: 'Interviews', href: '/interviews', icon: CalendarRange },
-  { name: 'Reminders', href: '/reminders', icon: CheckSquare },
-  { name: 'Analytics', href: '/analytics', icon: TrendingUp },
-  { name: 'Feedback', href: '/feedback', icon: MessageSquare },
-  { name: 'Profile', href: '/profile', icon: User },
+  { name: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard },
+  { name: 'Applications', href: '/app/applications', icon: KanbanSquare },
+  { name: 'Resumes', href: '/app/resumes', icon: FileText },
+  { name: 'Interviews', href: '/app/interviews', icon: CalendarRange },
+  { name: 'Reminders', href: '/app/reminders', icon: CheckSquare },
+  { name: 'Analytics', href: '/app/analytics', icon: TrendingUp },
+  { name: 'Feedback', href: '/app/feedback', icon: MessageSquare },
+  { name: 'Profile', href: '/app/profile', icon: User },
 ];
 
 export default function DashboardLayout({
@@ -333,7 +333,7 @@ export default function DashboardLayout({
               {profileMenuOpen && (
                 <div className="absolute right-0 mt-2 w-48 rounded-xl bg-zinc-900 border border-zinc-800 shadow-2xl p-2 z-50">
                   <Link
-                    href="/profile"
+                    href="/app/profile"
                     onClick={() => setProfileMenuOpen(false)}
                     className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50 transition duration-150"
                   >

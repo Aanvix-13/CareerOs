@@ -13,7 +13,7 @@ export default function HomePage() {
     const init = async () => {
       await checkSession();
       if (useAuthStore.getState().isAuthenticated) {
-        router.replace('/app/dashboard');
+        router.replace('/auth/redirect');
       } else {
         router.replace('/sign-in');
       }
