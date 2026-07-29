@@ -42,6 +42,99 @@ export class UserRepository {
     // Deprecated for Supabase Auth, but keeping signature for backward compatibility
     return prisma.user.findUniqueOrThrow({ where: { id } });
   }
+
+  async findMany(params: {
+    skip: number;
+    take: number;
+    search?: string;
+    status?: 'active' | 'suspended';
+    sortBy?: 'name' | 'createdAt';
+    sortOrder?: 'asc' | 'desc';
+  }): Promise<any[]> {
+    const where: any = {};
+
+    if (params.status) {
+      where.isSuspended = params.status === 'suspended';
+    }
+
+    if (params.search) {
+      where.OR = [
+        { email: { contains: params.search, mode: 'insensitive' } },
+        {
+          profile: {
+            OR: [
+              { fullName: { contains: params.search, mode: 'insensitive' } },
+              { college: { contains: params.search, mode: 'insensitive' } },
+            ],
+          },
+        },
+      ];
+    }
+
+    let orderBy: any = { createdAt: 'desc' };
+    if (params.sortBy === 'name') {
+      orderBy = { profile: { fullName: params.sortOrder || 'asc' } };
+    } else if (params.sortBy === 'createdAt') {
+      orderBy = { createdAt: params.sortOrder || 'desc' };
+    }
+
+    return prisma.user.findMany({
+      where,
+      skip: params.skip,
+      take: params.take,
+      orderBy,
+      include: {
+        profile: true,
+        _count: {
+          select: {
+            applications: true,
+            resumes: true,
+          },
+        },
+      },
+    });
+  }
+
+  async count(params: {
+    search?: string;
+    status?: 'active' | 'suspended';
+  }): Promise<number> {
+    const where: any = {};
+
+    if (params.status) {
+      where.isSuspended = params.status === 'suspended';
+    }
+
+    if (params.search) {
+      where.OR = [
+        { email: { contains: params.search, mode: 'insensitive' } },
+        {
+          profile: {
+            OR: [
+              { fullName: { contains: params.search, mode: 'insensitive' } },
+              { college: { contains: params.search, mode: 'insensitive' } },
+            ],
+          },
+        },
+      ];
+    }
+
+    return prisma.user.count({ where });
+  }
+
+  async updateSuspension(id: string, isSuspended: boolean): Promise<User> {
+    return prisma.user.update({
+      where: { id },
+      data: { isSuspended },
+    });
+  }
+
+  async delete(id: string): Promise<User> {
+    return prisma.user.delete({
+      where: { id },
+    });
+  }
 }
 
 export default new UserRepository();
+

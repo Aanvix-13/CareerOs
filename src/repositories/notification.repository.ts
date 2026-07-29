@@ -60,6 +60,58 @@ export class NotificationRepository {
       where: { id },
     });
   }
+
+  async createMany(data: Omit<Notification, 'id' | 'createdAt' | 'updatedAt' | 'readAt'>[]): Promise<number> {
+    const result = await prisma.notification.createMany({
+      data,
+    });
+    return result.count;
+  }
+
+  async findMany(params: {
+    skip: number;
+    take: number;
+    search?: string;
+  }): Promise<any[]> {
+    const where: any = {};
+
+    if (params.search) {
+      where.OR = [
+        { title: { contains: params.search, mode: 'insensitive' } },
+        { message: { contains: params.search, mode: 'insensitive' } },
+      ];
+    }
+
+    return prisma.notification.findMany({
+      where,
+      skip: params.skip,
+      take: params.take,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          include: {
+            profile: true,
+          },
+        },
+      },
+    });
+  }
+
+  async count(params: {
+    search?: string;
+  }): Promise<number> {
+    const where: any = {};
+
+    if (params.search) {
+      where.OR = [
+        { title: { contains: params.search, mode: 'insensitive' } },
+        { message: { contains: params.search, mode: 'insensitive' } },
+      ];
+    }
+
+    return prisma.notification.count({ where });
+  }
 }
 
 export default new NotificationRepository();
+

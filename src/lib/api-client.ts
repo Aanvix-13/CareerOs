@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const baseURL = typeof window === 'undefined'
-  ? (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000') + '/api/v1'
-  : '/api/v1';
+  ? (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000') + '/api/app'
+  : '/api/app';
 
 export const apiClient = axios.create({
   baseURL,
@@ -15,9 +15,9 @@ export const apiClient = axios.create({
 apiClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    // If unauthorized, redirect to login
-    if (error.response?.status === 401 && typeof window !== 'undefined' && !window.location.pathname.startsWith('/login') && !window.location.pathname.startsWith('/register')) {
-      window.location.href = '/login';
+    // If unauthorized, redirect to sign-in
+    if (error.response?.status === 401 && typeof window !== 'undefined' && !window.location.pathname.startsWith('/sign-in') && !window.location.pathname.startsWith('/sign-up')) {
+      window.location.href = '/sign-in';
     }
     return Promise.reject(error.response?.data?.error || { message: error.message });
   }

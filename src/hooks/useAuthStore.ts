@@ -4,6 +4,7 @@ import apiClient from '../lib/api-client';
 interface User {
   id: string;
   email: string;
+  role?: string;
 }
 
 interface Profile {
@@ -74,7 +75,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await apiClient.post('/auth/logout');
       set({ user: null, profile: null, isAuthenticated: false, isLoading: false });
       if (typeof window !== 'undefined') {
-        window.location.href = '/login';
+        window.location.href = '/sign-in';
       }
     } catch (err: any) {
       set({ error: err.message || 'Logout failed.', isLoading: false });
@@ -86,7 +87,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const response: any = await apiClient.get('/auth/me');
       set({
-        user: { id: response.data.id, email: response.data.email },
+        user: { id: response.data.id, email: response.data.email, role: response.data.role },
         profile: response.data.profile,
         isAuthenticated: true,
       });

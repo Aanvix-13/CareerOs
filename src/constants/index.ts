@@ -16,16 +16,15 @@ export const FILE_LIMITS = {
 };
 
 export const ROUTES = {
-  PUBLIC: ['/', '/login', '/register', '/forgot-password'],
+  PUBLIC: ['/', '/sign-in', '/sign-up', '/features', '/pricing', '/about', '/contact', '/privacy', '/terms'],
   PROTECTED: [
-    '/dashboard',
-    '/profile',
-    '/resumes',
-    '/applications',
-    '/interviews',
-    '/reminders',
-    '/analytics',
-    '/feedback',
-    '/settings',
+    '/app/dashboard',
+    '/app/resumes',
+    '/app/applications',
+    '/app/interviews',
+    '/app/reminders',
+    '/app/analytics',
+    '/app/profile',
+    '/app/settings',
   ],
 };

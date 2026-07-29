@@ -1,93 +1,76 @@
-import userRepository from '../repositories/user.repository';
-import { createSupabaseServerClient } from '../lib/supabase/server';
-import { ConflictError, AuthError } from '../lib/errors';
+import { currentUser } from '@clerk/nextjs/server';
+import prisma from '../lib/prisma';
 import notificationService from './notification.service';
 import { User, Profile } from '@prisma/client';
+import { AuthError } from '../lib/errors';
 
 export class AuthService {
-  async register(
-    email: string,
-    password: string,
-    fullName: string
-  ): Promise<{ user: User; profile: Profile }> {
-    // Check if email already exists in our local database first
-    const existingUser = await userRepository.findByEmail(email);
-    if (existingUser) {
-      throw new ConflictError('Email already exists.');
+  async getOrCreateSyncUser(clerkUserId: string): Promise<{ user: User; profile: Profile | null }> {
+    // 1. Find user by clerkId in our database
+    let dbUser = await prisma.user.findUnique({
+      where: { clerkId: clerkUserId },
+      include: { profile: true },
+    });
+
+    if (dbUser) {
+      if (dbUser.isSuspended) {
+        throw new AuthError('Your account has been suspended by an administrator.');
+      }
+      return { user: dbUser, profile: dbUser.profile };
     }
 
-    const supabase = await createSupabaseServerClient();
+    // 2. If user is authenticated in Clerk but not synced yet, fetch full details from Clerk SDK
+    const clerkUser = await currentUser();
+    if (!clerkUser) {
+      throw new AuthError('Authenticated Clerk user profile not found.');
+    }
 
-    // 1. Sign up user in Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
+    const email = clerkUser.emailAddresses[0]?.emailAddress || '';
+    const fullName = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || email.split('@')[0] || 'User';
+
+    // 3. Self-healing transaction: Map clerkId to existing email OR create a new user and profile
+    const result = await prisma.$transaction(async (tx) => {
+      const existingUser = await tx.user.findUnique({
+        where: { email },
+        include: { profile: true },
+      });
+
+      if (existingUser) {
+        const updatedUser = await tx.user.update({
+          where: { id: existingUser.id },
+          data: { clerkId: clerkUserId },
+          include: { profile: true },
+        });
+        return { user: updatedUser, profile: updatedUser.profile };
+      }
+
+      const createdUser = await tx.user.create({
         data: {
-          full_name: fullName,
+          clerkId: clerkUserId,
+          email,
+          role: 'user',
         },
-      },
+      });
+
+      const createdProfile = await tx.profile.create({
+        data: {
+          userId: createdUser.id,
+          fullName,
+        },
+      });
+
+      return { user: createdUser, profile: createdProfile };
     });
 
-    if (authError || !authData.user) {
-      throw new ConflictError(authError?.message || 'Failed to sign up user in Supabase.');
-    }
-
-    // 2. Create user & profile records in PostgreSQL inside a single Prisma transaction using the Supabase UUID
-    const { user, profile } = await userRepository.create({
-      id: authData.user.id,
-      email,
-      fullName,
-    });
-
-    // 3. Send system welcome notification
+    // 4. Dispatch welcome notification
     await notificationService.createNotification({
-      userId: user.id,
+      userId: result.user.id,
       type: 'Welcome',
       title: 'Welcome to CareerOS!',
       message: `Hello ${fullName}, welcome to CareerOS. Start tracking your applications by uploading your first resume!`,
     });
 
-    return { user, profile };
-  }
-
-  async login(
-    email: string,
-    password: string
-  ): Promise<{ user: User }> {
-    const supabase = await createSupabaseServerClient();
-
-    // 1. Sign in via Supabase Auth (this automatically sets session cookies)
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (authError || !authData.user) {
-      throw new AuthError(authError?.message || 'Invalid email or password.');
-    }
-
-    // 2. Ensure user exists in our local PostgreSQL database (Self-healing on-demand sync)
-    let user = await userRepository.findById(authData.user.id);
-    if (!user) {
-      const fullName = authData.user.user_metadata?.full_name || email.split('@')[0] || 'User';
-      const created = await userRepository.create({
-        id: authData.user.id,
-        email: authData.user.email!,
-        fullName,
-      });
-      user = created.user;
-    }
-
-    return { user };
-  }
-
-  async changePassword(newPassword: string): Promise<void> {
-    const supabase = await createSupabaseServerClient();
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    if (error) {
-      throw new AuthError(error.message);
-    }
+    return result;
   }
 }
 
