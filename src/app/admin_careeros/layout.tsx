@@ -71,7 +71,7 @@ export default function AdminLayout({
   useEffect(() => {
     if (sessionChecked) {
       if (!isAuthenticated || user?.role !== 'admin') {
-        router.replace('/dashboard');
+        router.replace('/app/dashboard');
       }
     }
   }, [sessionChecked, isAuthenticated, user, router]);
@@ -246,7 +246,7 @@ export default function AdminLayout({
                     Admin Profile
                   </Link>
                   <Link
-                    href="/dashboard"
+                    href="/app/dashboard"
                     onClick={() => setProfileMenuOpen(false)}
                     className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-indigo-400 hover:bg-indigo-950/15 transition duration-150"
                   >
