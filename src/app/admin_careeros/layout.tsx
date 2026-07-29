@@ -78,10 +78,10 @@ export default function AdminLayout({
 
   if (!sessionChecked || !isAuthenticated || user?.role !== 'admin') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-          <p className="text-zinc-400 text-sm">Verifying administrator credentials...</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#FAFAFA]">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-[#6D5EF5]" />
+          <p className="text-[#6B7280] text-sm font-semibold font-[--font-sans]">Verifying administrator credentials...</p>
         </div>
       </div>
     );
@@ -93,18 +93,15 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex flex-col md:flex-row relative">
-      {/* Background radial glows */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-indigo-950/10 blur-[120px] pointer-events-none -z-10" />
-      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-violet-950/10 blur-[120px] pointer-events-none -z-10" />
-
+    <div className="min-h-screen bg-[#FAFAFA] text-[#111827] flex flex-col md:flex-row relative font-[--font-sans]">
+      
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex flex-col w-64 bg-zinc-900/50 backdrop-blur-md border-r border-zinc-800/80 p-6 shrink-0 h-screen sticky top-0">
+      <aside className="hidden md:flex flex-col w-64 bg-white border-r border-[#E5E7EB] p-6 shrink-0 h-screen sticky top-0">
         <div className="flex items-center gap-3 px-2 mb-8">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 glow-indigo">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#6D5EF5] shadow-[0_4px_12px_rgba(109,94,245,0.2)]">
             <Briefcase className="h-5 w-5 text-white" />
           </div>
-          <span className="font-bold text-xl tracking-tight bg-gradient-to-r from-white via-zinc-200 to-zinc-400 bg-clip-text text-transparent">
+          <span className="font-black text-xl tracking-tight text-[#111827]">
             Admin Panel
           </span>
         </div>
@@ -117,25 +114,25 @@ export default function AdminLayout({
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 ${
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition duration-200 ${
                   isActive
-                    ? 'bg-indigo-600/15 text-indigo-400 border border-indigo-500/20'
-                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50 border border-transparent'
+                    ? 'bg-[#F3F1FF] text-[#6D5EF5]'
+                    : 'text-[#4B5563] hover:text-[#111827] hover:bg-[#F8FAFC]'
                 }`}
               >
-                <Icon className="h-5 w-5" />
+                <Icon className="h-5 w-5 shrink-0" />
                 {item.name}
               </Link>
             );
           })}
         </nav>
 
-        <div className="mt-auto border-t border-zinc-800/80 pt-4">
+        <div className="mt-auto border-t border-[#F1F5F9] pt-4">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-rose-400 hover:bg-rose-950/10 border border-transparent hover:border-rose-500/10 transition duration-150 cursor-pointer"
+            className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-bold text-[#6B7280] hover:text-[#EF4444] hover:bg-[#FEF2F2] transition duration-200 cursor-pointer"
           >
-            <LogOut className="h-5 w-5" />
+            <LogOut className="h-5 w-5 shrink-0" />
             Sign out
           </button>
         </div>
@@ -144,25 +141,25 @@ export default function AdminLayout({
       {/* Mobile Drawer Navigation Sidebar Backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Mobile Drawer Navigation Sidebar */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 w-64 bg-zinc-900/95 z-50 p-6 border-r border-zinc-800 transform transition-transform duration-300 md:hidden flex flex-col ${
+        className={`fixed top-0 bottom-0 left-0 w-64 bg-white z-50 p-6 border-r border-[#E5E7EB] transform transition-transform duration-300 md:hidden flex flex-col ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#6D5EF5]">
               <Briefcase className="h-4 w-4 text-white" />
             </div>
-            <span className="font-bold text-lg">Admin Panel</span>
+            <span className="font-black text-lg tracking-tight text-[#111827]">Admin Panel</span>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="text-zinc-400 hover:text-white">
+          <button onClick={() => setSidebarOpen(false)} className="text-[#6B7280] hover:text-[#111827]">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -176,25 +173,25 @@ export default function AdminLayout({
                 key={item.name}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition duration-150 ${
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold transition duration-200 ${
                   isActive
-                    ? 'bg-indigo-600/15 text-indigo-400 border border-indigo-500/20'
-                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                    ? 'bg-[#F3F1FF] text-[#6D5EF5]'
+                    : 'text-[#4B5563] hover:text-[#111827] hover:bg-[#F8FAFC]'
                 }`}
               >
-                <Icon className="h-5 w-5" />
+                <Icon className="h-5 w-5 shrink-0" />
                 {item.name}
               </Link>
             );
           })}
         </nav>
 
-        <div className="mt-auto border-t border-zinc-800 pt-4">
+        <div className="mt-auto border-t border-[#F1F5F9] pt-4">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-zinc-400 hover:text-rose-400 hover:bg-rose-950/10 cursor-pointer"
+            className="flex items-center gap-3 w-full px-4 py-2.5 rounded-xl text-sm font-bold text-[#6B7280] hover:text-[#EF4444] hover:bg-[#FEF2F2] cursor-pointer"
           >
-            <LogOut className="h-5 w-5" />
+            <LogOut className="h-5 w-5 shrink-0" />
             Sign out
           </button>
         </div>
@@ -203,16 +200,16 @@ export default function AdminLayout({
       {/* Main Container */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header */}
-        <header className="h-16 bg-zinc-900/20 backdrop-blur-md border-b border-zinc-800/60 px-4 md:px-8 flex items-center justify-between sticky top-0 z-30">
+        <header className="h-16 bg-white border-b border-[#E5E7EB] px-4 md:px-8 flex items-center justify-between sticky top-0 z-30">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="md:hidden text-zinc-400 hover:text-white cursor-pointer"
+            className="md:hidden text-[#4B5563] hover:text-[#111827] cursor-pointer"
           >
             <Menu className="h-6 w-6" />
           </button>
 
-          <div className="hidden sm:block text-sm text-zinc-400 font-medium">
-            System Administrator: <span className="text-white font-semibold">{profile?.fullName}</span>
+          <div className="hidden sm:block text-sm text-[#4B5563] font-semibold">
+            System Administrator: <span className="text-[#111827] font-extrabold">{profile?.fullName}</span>
           </div>
 
           <div className="flex items-center gap-4 ml-auto">
@@ -220,27 +217,27 @@ export default function AdminLayout({
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                className="flex items-center gap-2 p-1 pr-3 rounded-full bg-zinc-900/50 border border-zinc-800 hover:border-zinc-700 transition duration-150 cursor-pointer"
+                className="flex items-center gap-2 p-1 pr-3 rounded-full bg-white border border-[#E5E7EB] hover:bg-[#F8FAFC] transition duration-200 cursor-pointer"
               >
-                <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-semibold text-white overflow-hidden">
+                <div className="h-8 w-8 rounded-full bg-[#F3F1FF] text-[#6D5EF5] flex items-center justify-center text-sm font-bold overflow-hidden border border-[#E5E7EB]">
                   {profile?.profileImageUrl ? (
                     <img src={profile.profileImageUrl} alt="avatar" className="h-full w-full object-cover" />
                   ) : (
                     profile?.fullName.charAt(0).toUpperCase()
                   )}
                 </div>
-                <span className="hidden sm:inline text-xs font-semibold text-zinc-300">
+                <span className="hidden sm:inline text-xs font-bold text-[#4B5563]">
                   {profile?.fullName.split(' ')[0]}
                 </span>
-                <ChevronDown className="h-3 w-3 text-zinc-500 hidden sm:block" />
+                <ChevronDown className="h-3 w-3 text-[#6B7280] hidden sm:block" />
               </button>
 
               {profileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 rounded-xl bg-zinc-900 border border-zinc-800 shadow-2xl p-2 z-50">
+                <div className="absolute right-0 mt-2 w-48 rounded-[16px] bg-white border border-[#E5E7EB] shadow-[0_8px_24px_rgba(15,23,42,0.08)] p-2 z-50">
                   <Link
                     href="/admin_careeros/profile"
                     onClick={() => setProfileMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50 transition duration-150"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-[#4B5563] hover:text-[#111827] hover:bg-[#F8FAFC] transition duration-200 font-bold"
                   >
                     <User className="h-4 w-4" />
                     Admin Profile
@@ -248,7 +245,7 @@ export default function AdminLayout({
                   <Link
                     href="/app/dashboard"
                     onClick={() => setProfileMenuOpen(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-indigo-400 hover:bg-indigo-950/15 transition duration-150"
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-[#6D5EF5] hover:bg-[#F3F1FF] transition duration-200 font-bold"
                   >
                     <Briefcase className="h-4 w-4" />
                     User Dashboard
@@ -258,7 +255,7 @@ export default function AdminLayout({
                       setProfileMenuOpen(false);
                       handleLogout();
                     }}
-                    className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-rose-400 hover:bg-rose-950/10 transition duration-150 text-left cursor-pointer"
+                    className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-[#EF4444] hover:bg-[#FEF2F2] transition duration-200 text-left cursor-pointer font-bold"
                   >
                     <LogOut className="h-4 w-4" />
                     Sign out
@@ -276,7 +273,7 @@ export default function AdminLayout({
       </div>
 
       {/* Mobile Bottom Navigation Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-zinc-900 border-t border-zinc-800 flex justify-around items-center px-2 z-30 backdrop-blur-md bg-zinc-900/90">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-[#E5E7EB] flex justify-around items-center px-2 z-30 shadow-lg">
         {navigation.slice(0, 5).map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -284,8 +281,8 @@ export default function AdminLayout({
             <Link
               key={item.name}
               href={item.href}
-              className={`flex flex-col items-center justify-center flex-1 h-full text-[10px] font-medium transition duration-150 ${
-                isActive ? 'text-indigo-400' : 'text-zinc-500'
+              className={`flex flex-col items-center justify-center flex-1 h-full text-[10px] font-bold transition duration-200 ${
+                isActive ? 'text-[#6D5EF5]' : 'text-[#6B7280]'
               }`}
             >
               <Icon className="h-5 w-5 mb-1" />
