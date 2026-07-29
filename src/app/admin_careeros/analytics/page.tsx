@@ -5,14 +5,12 @@ import axios from 'axios';
 import {
   TrendingUp,
   FileSpreadsheet,
-  Loader2,
   AlertCircle,
-  Calendar,
-  Layers,
-  MessageSquare,
   CalendarDays,
   Briefcase,
+  MessageSquare,
 } from 'lucide-react';
+import { PageHeader, Card, Spinner, Alert, Button, Select } from '@/components/ui';
 
 interface DataPoint {
   name: string;
@@ -67,8 +65,8 @@ export default function AdminAnalyticsPage() {
     return (
       <div className="flex h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-          <p className="text-zinc-400 text-sm">Loading system analytics...</p>
+          <Spinner size="lg" />
+          <p className="text-[#6B7280] text-sm font-semibold">Loading system analytics...</p>
         </div>
       </div>
     );
@@ -76,16 +74,11 @@ export default function AdminAnalyticsPage() {
 
   if (error || !data) {
     return (
-      <div className="rounded-2xl border border-rose-500/20 bg-rose-950/10 p-6 text-center text-rose-400 max-w-xl mx-auto mt-12">
-        <AlertCircle className="h-10 w-10 mx-auto mb-3 text-rose-500" />
-        <h3 className="font-semibold text-white mb-1">Failed to load analytics</h3>
-        <p className="text-sm text-zinc-400 mb-4">{error}</p>
-        <button
-          onClick={fetchAnalytics}
-          className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-semibold transition"
-        >
-          Try Again
-        </button>
+      <div className="max-w-xl mx-auto mt-12">
+        <Alert variant="danger" title="Failed to load analytics" icon={<AlertCircle className="h-5 w-5" />}>
+          <div className="mb-4">{error}</div>
+          <Button variant="danger" size="sm" onClick={fetchAnalytics}>Try Again</Button>
+        </Alert>
       </div>
     );
   }
@@ -98,47 +91,42 @@ export default function AdminAnalyticsPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12 animate-fade-in">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">Platform Analytics</h1>
-          <p className="text-sm text-zinc-400 mt-1">Audit statistics, conversion metrics, and system usage graphs.</p>
-        </div>
-
-        <div className="flex items-center gap-3 shrink-0">
-          <select
-            value={timeRange}
-            onChange={(e: any) => setTimeRange(e.target.value)}
-            className="px-4 py-2.5 rounded-xl border border-zinc-800 bg-zinc-900 text-sm text-zinc-300 focus:outline-none cursor-pointer"
-          >
-            <option value="7days">Last 7 Days</option>
-            <option value="30days">Last 30 Days</option>
-            <option value="12months">Last 12 Months</option>
-          </select>
-
-          <button
-            onClick={handleExport}
-            disabled={exportLoading}
-            className="flex items-center gap-2 px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-white rounded-xl text-sm font-semibold transition cursor-pointer"
-          >
-            {exportLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin text-zinc-400" />
-            ) : (
-              <FileSpreadsheet className="h-4 w-4 text-green-400" />
-            )}
-            Export CSV
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Platform Analytics"
+        description="Audit statistics, conversion metrics, and system usage graphs."
+        actions={
+          <div className="flex items-center gap-3">
+            <div className="w-40">
+              <Select
+                value={timeRange}
+                onChange={(e: any) => setTimeRange(e.target.value)}
+              >
+                <option value="7days">Last 7 Days</option>
+                <option value="30days">Last 30 Days</option>
+                <option value="12months">Last 12 Months</option>
+              </Select>
+            </div>
+            <Button
+              variant="secondary"
+              onClick={handleExport}
+              loading={exportLoading}
+              icon={<FileSpreadsheet className="h-4 w-4 text-[#166534]" />}
+            >
+              Export CSV
+            </Button>
+          </div>
+        }
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* User Growth Chart */}
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/20 p-6 flex flex-col h-96">
-          <h3 className="font-bold text-sm text-white border-b border-zinc-850 pb-3 mb-6 flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-blue-400" />
+        <Card className="flex flex-col h-96">
+          <h3 className="font-bold text-sm text-[#111827] border-b border-[#F1F5F9] pb-3 mb-6 flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-[#3B82F6]" />
             User Registrations Growth
           </h3>
           {userGrowth.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center text-sm text-zinc-500">
+            <div className="flex-1 flex items-center justify-center text-sm text-[#6B7280]">
               No registration activity recorded.
             </div>
           ) : (
@@ -146,15 +134,15 @@ export default function AdminAnalyticsPage() {
               {userGrowth.map((item) => {
                 const pct = (item.value / maxUsers) * 100;
                 return (
-                  <div key={item.name} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
-                    <span className="text-[9px] text-zinc-400 font-bold opacity-0 group-hover:opacity-100 transition">
+                  <div key={item.name} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group relative">
+                    <span className="text-[10px] text-[#4B5563] font-bold opacity-0 group-hover:opacity-100 transition absolute -top-4">
                       {item.value}
                     </span>
                     <div
-                      className="w-full bg-blue-500 hover:bg-blue-400 rounded-t transition-all duration-200"
+                      className="w-full bg-[#3B82F6] hover:bg-[#2563EB] rounded-t transition-all duration-200"
                       style={{ height: `${pct * 0.7}%` }}
                     />
-                    <span className="text-[8px] text-zinc-500 font-semibold truncate max-w-[45px]">
+                    <span className="text-[9px] text-[#6B7280] font-semibold truncate max-w-[45px]">
                       {item.name}
                     </span>
                   </div>
@@ -162,16 +150,16 @@ export default function AdminAnalyticsPage() {
               })}
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Application Growth Chart */}
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/20 p-6 flex flex-col h-96">
-          <h3 className="font-bold text-sm text-white border-b border-zinc-850 pb-3 mb-6 flex items-center gap-2">
-            <Briefcase className="h-4 w-4 text-indigo-400" />
+        <Card className="flex flex-col h-96">
+          <h3 className="font-bold text-sm text-[#111827] border-b border-[#F1F5F9] pb-3 mb-6 flex items-center gap-2">
+            <Briefcase className="h-4 w-4 text-[#8B5CF6]" />
             Applications Created Trends
           </h3>
           {applicationGrowth.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center text-sm text-zinc-500">
+            <div className="flex-1 flex items-center justify-center text-sm text-[#6B7280]">
               No job applications added.
             </div>
           ) : (
@@ -179,15 +167,15 @@ export default function AdminAnalyticsPage() {
               {applicationGrowth.map((item) => {
                 const pct = (item.value / maxApps) * 100;
                 return (
-                  <div key={item.name} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
-                    <span className="text-[9px] text-zinc-400 font-bold opacity-0 group-hover:opacity-100 transition">
+                  <div key={item.name} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group relative">
+                    <span className="text-[10px] text-[#4B5563] font-bold opacity-0 group-hover:opacity-100 transition absolute -top-4">
                       {item.value}
                     </span>
                     <div
-                      className="w-full bg-indigo-500 hover:bg-indigo-400 rounded-t transition-all duration-200"
+                      className="w-full bg-[#8B5CF6] hover:bg-[#7C3AED] rounded-t transition-all duration-200"
                       style={{ height: `${pct * 0.7}%` }}
                     />
-                    <span className="text-[8px] text-zinc-500 font-semibold truncate max-w-[45px]">
+                    <span className="text-[9px] text-[#6B7280] font-semibold truncate max-w-[45px]">
                       {item.name}
                     </span>
                   </div>
@@ -195,16 +183,16 @@ export default function AdminAnalyticsPage() {
               })}
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Interview Activity Chart */}
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/20 p-6 flex flex-col h-96">
-          <h3 className="font-bold text-sm text-white border-b border-zinc-850 pb-3 mb-6 flex items-center gap-2">
-            <CalendarDays className="h-4 w-4 text-purple-400" />
+        <Card className="flex flex-col h-96">
+          <h3 className="font-bold text-sm text-[#111827] border-b border-[#F1F5F9] pb-3 mb-6 flex items-center gap-2">
+            <CalendarDays className="h-4 w-4 text-[#6D5EF5]" />
             Interviews Scheduled Timeline
           </h3>
           {interviewActivity.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center text-sm text-zinc-500">
+            <div className="flex-1 flex items-center justify-center text-sm text-[#6B7280]">
               No interview slots scheduled.
             </div>
           ) : (
@@ -212,15 +200,15 @@ export default function AdminAnalyticsPage() {
               {interviewActivity.map((item) => {
                 const pct = (item.value / maxInterviews) * 100;
                 return (
-                  <div key={item.name} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group">
-                    <span className="text-[9px] text-zinc-400 font-bold opacity-0 group-hover:opacity-100 transition">
+                  <div key={item.name} className="flex-1 flex flex-col items-center gap-2 h-full justify-end group relative">
+                    <span className="text-[10px] text-[#4B5563] font-bold opacity-0 group-hover:opacity-100 transition absolute -top-4">
                       {item.value}
                     </span>
                     <div
-                      className="w-full bg-purple-500 hover:bg-purple-400 rounded-t transition-all duration-200"
+                      className="w-full bg-[#6D5EF5] hover:bg-[#5B4BE6] rounded-t transition-all duration-200"
                       style={{ height: `${pct * 0.7}%` }}
                     />
-                    <span className="text-[8px] text-zinc-500 font-semibold truncate max-w-[45px]">
+                    <span className="text-[9px] text-[#6B7280] font-semibold truncate max-w-[45px]">
                       {item.name}
                     </span>
                   </div>
@@ -228,16 +216,16 @@ export default function AdminAnalyticsPage() {
               })}
             </div>
           )}
-        </div>
+        </Card>
 
         {/* Feedback Categories Distribution */}
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/20 p-6 flex flex-col h-96">
-          <h3 className="font-bold text-sm text-white border-b border-zinc-850 pb-3 mb-6 flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 text-emerald-400" />
+        <Card className="flex flex-col h-96">
+          <h3 className="font-bold text-sm text-[#111827] border-b border-[#F1F5F9] pb-3 mb-6 flex items-center gap-2">
+            <MessageSquare className="h-4 w-4 text-[#22C55E]" />
             Feedback Category Distribution
           </h3>
           {feedbackDistribution.length === 0 ? (
-            <div className="flex-1 flex items-center justify-center text-sm text-zinc-500">
+            <div className="flex-1 flex items-center justify-center text-sm text-[#6B7280]">
               No feedback submissions categorised yet.
             </div>
           ) : (
@@ -247,13 +235,13 @@ export default function AdminAnalyticsPage() {
                 const pct = totalVal > 0 ? ((item.value / totalVal) * 100).toFixed(0) : '0';
                 return (
                   <div key={item.name} className="space-y-1">
-                    <div className="flex justify-between text-xs font-semibold text-zinc-300">
+                    <div className="flex justify-between text-xs font-semibold text-[#6B7280]">
                       <span>{item.name}</span>
-                      <span className="text-white font-extrabold">{item.value} ({pct}%)</span>
+                      <span className="text-[#111827] font-extrabold">{item.value} ({pct}%)</span>
                     </div>
-                    <div className="h-3 w-full bg-zinc-950/40 rounded border border-zinc-800 overflow-hidden">
+                    <div className="h-3 w-full bg-[#F1F5F9] rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-emerald-500 rounded"
+                        className="h-full bg-[#22C55E] rounded-full"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -262,7 +250,7 @@ export default function AdminAnalyticsPage() {
               })}
             </div>
           )}
-        </div>
+        </Card>
       </div>
     </div>
   );

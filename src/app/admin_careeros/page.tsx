@@ -3,24 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
-  Users,
-  UserCheck,
-  UserX,
-  Briefcase,
-  FileText,
-  CalendarRange,
-  MessageSquare,
-  AlertCircle,
-  Loader2,
-  ArrowRight,
-  TrendingUp,
-  Settings,
-  Bell,
-  Activity,
-  History,
-  AlertTriangle,
+  Users, UserCheck, UserX, Briefcase, FileText,
+  CalendarRange, MessageSquare, AlertCircle, Loader2,
+  ArrowRight, TrendingUp, Settings, Bell, Activity, AlertTriangle,
 } from 'lucide-react';
 import Link from 'next/link';
+import { Card, Badge, Button } from '@/components/ui';
 
 interface DashboardStats {
   totalUsers: number;
@@ -69,10 +57,10 @@ export default function AdminDashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex h-[60vh] items-center justify-center bg-zinc-950">
+      <div className="flex h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-          <p className="text-zinc-400 text-sm">Loading dashboard statistics...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-[#6D5EF5]" />
+          <p className="text-[#6B7280] text-sm font-semibold">Loading dashboard statistics...</p>
         </div>
       </div>
     );
@@ -80,36 +68,38 @@ export default function AdminDashboardPage() {
 
   if (error || !stats) {
     return (
-      <div className="rounded-2xl border border-rose-500/20 bg-rose-950/10 p-6 text-center text-rose-400 max-w-xl mx-auto my-12">
-        <AlertTriangle className="h-10 w-10 mx-auto mb-3 text-rose-500" />
-        <h3 className="font-semibold text-lg text-white mb-1">Failed to Load Dashboard</h3>
-        <p className="text-sm text-zinc-400 mb-4">{error || 'An unexpected error occurred.'}</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-xs font-semibold transition"
-        >
-          Try Again
-        </button>
+      <div className="rounded-[24px] border border-[#FECACA] bg-[#FEF2F2] p-8 text-center max-w-xl mx-auto my-12">
+        <AlertTriangle className="h-10 w-10 mx-auto mb-3 text-[#EF4444]" />
+        <h3 className="font-bold text-lg text-[#111827] mb-1">Failed to Load Dashboard</h3>
+        <p className="text-sm text-[#4B5563] mb-4">{error || 'An unexpected error occurred.'}</p>
+        <Button variant="danger" size="sm" onClick={() => window.location.reload()}>Try Again</Button>
       </div>
     );
   }
 
   const statCards = [
-    { title: 'Total Users', value: stats.totalUsers, icon: Users, color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' },
-    { title: 'Active Users', value: stats.activeUsers, icon: UserCheck, color: 'text-green-400', bg: 'bg-green-500/10 border-green-500/20' },
-    { title: 'Suspended Users', value: stats.suspendedUsers, icon: UserX, color: 'text-rose-400', bg: 'bg-rose-500/10 border-rose-500/20' },
-    { title: 'New Today', value: stats.newUsersToday, icon: TrendingUp, color: 'text-yellow-400', bg: 'bg-yellow-500/10 border-yellow-500/20' },
-    { title: 'Applications', value: stats.totalApplications, icon: Briefcase, color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20' },
-    { title: 'Resumes', value: stats.totalResumes, icon: FileText, color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20' },
-    { title: 'Interviews', value: stats.totalInterviews, icon: CalendarRange, color: 'text-indigo-400', bg: 'bg-indigo-500/10 border-indigo-500/20' },
-    { title: 'Pending Feedback', value: stats.pendingFeedback, icon: AlertCircle, color: 'text-teal-400', bg: 'bg-teal-500/10 border-teal-500/20' },
+    { title: 'Total Users',       value: stats.totalUsers,         icon: Users,         iconBg: 'bg-[#EFF6FF]', iconColor: 'text-[#3B82F6]' },
+    { title: 'Active Users',      value: stats.activeUsers,        icon: UserCheck,     iconBg: 'bg-[#F0FDF4]', iconColor: 'text-[#22C55E]' },
+    { title: 'Suspended',         value: stats.suspendedUsers,     icon: UserX,         iconBg: 'bg-[#FEF2F2]', iconColor: 'text-[#EF4444]' },
+    { title: 'New Today',         value: stats.newUsersToday,      icon: TrendingUp,    iconBg: 'bg-[#FFFBEB]', iconColor: 'text-[#F59E0B]' },
+    { title: 'Applications',      value: stats.totalApplications,  icon: Briefcase,     iconBg: 'bg-[#F3F1FF]', iconColor: 'text-[#6D5EF5]' },
+    { title: 'Resumes',           value: stats.totalResumes,       icon: FileText,      iconBg: 'bg-[#FFF7ED]', iconColor: 'text-[#F97316]' },
+    { title: 'Interviews',        value: stats.totalInterviews,    icon: CalendarRange, iconBg: 'bg-[#F3F1FF]', iconColor: 'text-[#8B5CF6]' },
+    { title: 'Pending Feedback',  value: stats.pendingFeedback,    icon: AlertCircle,   iconBg: 'bg-[#F0FDF4]', iconColor: 'text-[#14B8A6]' },
+  ];
+
+  const quickActions = [
+    { href: '/admin_careeros/users',         label: 'Manage Users',      icon: Users,         color: 'text-[#3B82F6]' },
+    { href: '/admin_careeros/feedback',      label: 'Review Feedback',   icon: MessageSquare, color: 'text-[#22C55E]' },
+    { href: '/admin_careeros/notifications', label: 'Send Announcement', icon: Bell,          color: 'text-[#F59E0B]' },
+    { href: '/admin_careeros/settings',      label: 'System Settings',   icon: Settings,      color: 'text-[#8B5CF6]' },
   ];
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-8 max-w-7xl mx-auto font-[--font-sans]">
       <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">Admin Dashboard</h1>
-        <p className="text-sm text-zinc-400 mt-1">Real-time application health monitoring and statistics.</p>
+        <h1 className="text-3xl font-black text-[#111827] tracking-tight">Admin Dashboard</h1>
+        <p className="text-sm text-[#6B7280] font-semibold mt-1">Real-time application health monitoring and statistics.</p>
       </div>
 
       {/* Stats Grid */}
@@ -117,114 +107,86 @@ export default function AdminDashboardPage() {
         {statCards.map((card) => {
           const Icon = card.icon;
           return (
-            <div key={card.title} className={`p-6 rounded-2xl border ${card.bg} flex items-center justify-between`}>
+            <Card key={card.title} className="p-5 flex items-center justify-between gap-4">
               <div className="space-y-1">
-                <p className="text-xs text-zinc-400 font-medium uppercase tracking-wider">{card.title}</p>
-                <p className="text-2xl font-bold text-white">{card.value}</p>
+                <p className="text-xs text-[#6B7280] font-bold uppercase tracking-wider">{card.title}</p>
+                <p className="text-2xl font-black text-[#111827]">{card.value}</p>
               </div>
-              <div className={`p-3 rounded-xl bg-zinc-950/40 ${card.color}`}>
-                <Icon className="h-6 w-6" />
+              <div className={`h-11 w-11 rounded-[14px] ${card.iconBg} ${card.iconColor} flex items-center justify-center shrink-0`}>
+                <Icon className="h-5 w-5" />
               </div>
-            </div>
+            </Card>
           );
         })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Quick Actions */}
-        <div className="lg:col-span-1 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 space-y-6">
-          <div>
-            <h3 className="font-bold text-lg text-white flex items-center gap-2">
-              <Settings className="h-5 w-5 text-indigo-400" />
-              Quick Actions
-            </h3>
-            <p className="text-xs text-zinc-500 mt-0.5">Shortcuts to manage dashboard modules.</p>
-          </div>
+        <div className="lg:col-span-1">
+          <Card className="p-6 space-y-5">
+            <div>
+              <h3 className="font-bold text-lg text-[#111827] flex items-center gap-2">
+                <Settings className="h-5 w-5 text-[#6D5EF5]" />
+                Quick Actions
+              </h3>
+              <p className="text-xs text-[#6B7280] font-semibold mt-0.5">Shortcuts to manage dashboard modules.</p>
+            </div>
 
-          <div className="flex flex-col gap-3">
-            <Link
-              href="/admin_careeros/users"
-              className="flex items-center justify-between p-4 rounded-xl border border-zinc-800 bg-zinc-950/20 hover:bg-zinc-950/50 hover:border-zinc-700 transition group text-sm font-semibold"
-            >
-              <span className="flex items-center gap-3 text-zinc-300 group-hover:text-white">
-                <Users className="h-4 w-4 text-indigo-400" />
-                Manage Users
-              </span>
-              <ArrowRight className="h-4 w-4 text-zinc-500 group-hover:translate-x-1 group-hover:text-white transition" />
-            </Link>
-
-            <Link
-              href="/admin_careeros/feedback"
-              className="flex items-center justify-between p-4 rounded-xl border border-zinc-800 bg-zinc-950/20 hover:bg-zinc-950/50 hover:border-zinc-700 transition group text-sm font-semibold"
-            >
-              <span className="flex items-center gap-3 text-zinc-300 group-hover:text-white">
-                <MessageSquare className="h-4 w-4 text-emerald-400" />
-                Review Feedback
-              </span>
-              <ArrowRight className="h-4 w-4 text-zinc-500 group-hover:translate-x-1 group-hover:text-white transition" />
-            </Link>
-
-            <Link
-              href="/admin_careeros/notifications"
-              className="flex items-center justify-between p-4 rounded-xl border border-zinc-800 bg-zinc-950/20 hover:bg-zinc-950/50 hover:border-zinc-700 transition group text-sm font-semibold"
-            >
-              <span className="flex items-center gap-3 text-zinc-300 group-hover:text-white">
-                <Bell className="h-4 w-4 text-amber-400" />
-                Send Announcement
-              </span>
-              <ArrowRight className="h-4 w-4 text-zinc-500 group-hover:translate-x-1 group-hover:text-white transition" />
-            </Link>
-
-            <Link
-              href="/admin_careeros/settings"
-              className="flex items-center justify-between p-4 rounded-xl border border-zinc-800 bg-zinc-950/20 hover:bg-zinc-950/50 hover:border-zinc-700 transition group text-sm font-semibold"
-            >
-              <span className="flex items-center gap-3 text-zinc-300 group-hover:text-white">
-                <Settings className="h-4 w-4 text-purple-400" />
-                System Settings
-              </span>
-              <ArrowRight className="h-4 w-4 text-zinc-500 group-hover:translate-x-1 group-hover:text-white transition" />
-            </Link>
-          </div>
+            <div className="flex flex-col gap-3">
+              {quickActions.map(({ href, label, icon: Icon, color }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="flex items-center justify-between p-4 rounded-xl border border-[#E5E7EB] bg-[#FAFAFA] hover:bg-[#F3F1FF] hover:border-[#6D5EF5]/30 transition duration-200 group text-sm font-bold"
+                >
+                  <span className={`flex items-center gap-3 text-[#4B5563] group-hover:text-[#6D5EF5] transition-colors`}>
+                    <Icon className={`h-4 w-4 ${color}`} />
+                    {label}
+                  </span>
+                  <ArrowRight className="h-4 w-4 text-[#D1D5DB] group-hover:translate-x-1 group-hover:text-[#6D5EF5] transition-all" />
+                </Link>
+              ))}
+            </div>
+          </Card>
         </div>
 
-        {/* Audit Logs */}
-        <div className="lg:col-span-2 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-6 space-y-6">
-          <div>
-            <h3 className="font-bold text-lg text-white flex items-center gap-2">
-              <Activity className="h-5 w-5 text-indigo-500" />
-              Recent System Activity
-            </h3>
-            <p className="text-xs text-zinc-500 mt-0.5">Timeline of recent administrator actions.</p>
-          </div>
+        {/* Audit / Activity Logs */}
+        <div className="lg:col-span-2">
+          <Card className="p-6 space-y-5">
+            <div>
+              <h3 className="font-bold text-lg text-[#111827] flex items-center gap-2">
+                <Activity className="h-5 w-5 text-[#6D5EF5]" />
+                Recent System Activity
+              </h3>
+              <p className="text-xs text-[#6B7280] font-semibold mt-0.5">Timeline of recent administrator actions.</p>
+            </div>
 
-          <div className="max-h-[380px] overflow-y-auto space-y-4 pr-1">
-            {activities.length === 0 ? (
-              <div className="text-center py-12 text-sm text-zinc-500">
-                No recent administrative activity found.
-              </div>
-            ) : (
-              activities.map((activity) => (
-                <div key={activity.id} className="flex gap-4 p-3 rounded-xl bg-zinc-950/20 border border-zinc-900/80">
-                  <div className="flex items-center justify-center p-2 rounded-lg bg-indigo-500/10 text-indigo-400 shrink-0 h-10 w-10">
-                    <Activity className="h-5 w-5" />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-white px-2 py-0.5 bg-zinc-800 rounded">
-                        {activity.action}
-                      </span>
-                      <span className="text-[10px] text-zinc-500">
-                        {new Date(activity.timestamp).toLocaleString()}
-                      </span>
-                    </div>
-                    <p className="text-sm text-zinc-300 font-medium">{activity.details}</p>
-                    <p className="text-[10px] text-zinc-500">Resource: {activity.resource} • Admin: {activity.adminId}</p>
-                  </div>
+            <div className="max-h-[380px] overflow-y-auto space-y-3 pr-1">
+              {activities.length === 0 ? (
+                <div className="text-center py-12 text-sm text-[#6B7280] font-semibold">
+                  No recent administrative activity found.
                 </div>
-              ))
-            )}
-          </div>
+              ) : (
+                activities.map((activity) => (
+                  <div key={activity.id} className="flex gap-4 p-4 rounded-xl bg-[#FAFAFA] border border-[#E5E7EB]">
+                    <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-[#F3F1FF] text-[#6D5EF5] shrink-0">
+                      <Activity className="h-4 w-4" />
+                    </div>
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Badge variant="primary">{activity.action}</Badge>
+                        <span className="text-[10px] text-[#6B7280] font-semibold">
+                          {new Date(activity.timestamp).toLocaleString()}
+                        </span>
+                      </div>
+                      <p className="text-sm text-[#111827] font-semibold">{activity.details}</p>
+                      <p className="text-[10px] text-[#6B7280] font-medium">Resource: {activity.resource} • Admin: {activity.adminId}</p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </Card>
         </div>
       </div>
     </div>
