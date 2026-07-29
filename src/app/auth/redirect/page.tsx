@@ -16,7 +16,7 @@ export default function AuthRedirectPage() {
         const role = response?.data?.role;
 
         if (role === 'admin') {
-          router.replace('/admin_careeros/dashboard');
+          router.replace('/admin_careeros');
         } else {
           router.replace('/app/dashboard');
         }
