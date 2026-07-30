@@ -285,12 +285,12 @@ export default function LandingPage() {
                 Get Started Free
                 <ArrowRight className="h-4 w-4" />
               </Link>
-              <button
-                onClick={() => scrollTo('#features')}
+              <Link
+                href="/sign-in"
                 className="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 font-bold px-6 py-3.5 text-base transition hover:-translate-y-0.5 duration-200"
               >
-                See Features
-              </button>
+                Sign In
+              </Link>
             </div>
 
             {/* Trust Indicators */}
