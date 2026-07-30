@@ -435,41 +435,41 @@ export default function DashboardPage() {
 
       {/* ── 3. QUICK ACTIONS ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <button onClick={() => setActiveModal('addApp')}
+        <Link href="/app/applications"
           className="flex flex-col items-start p-6 bg-white border border-[#E5E7EB] rounded-[24px] text-left hover:-translate-y-1 hover:shadow-md transition duration-200 cursor-pointer group">
           <div className="h-12 w-12 rounded-2xl bg-[#F3F1FF] text-[#6D5EF5] flex items-center justify-center mb-4 transition duration-200 group-hover:scale-105">
             <Briefcase className="h-6 w-6" />
           </div>
           <h4 className="font-black text-sm text-[#111827]">Add Application</h4>
           <p className="text-xs text-[#6B7280] font-semibold mt-1">Track a new job listing and hiring stage details.</p>
-        </button>
+        </Link>
 
-        <button onClick={() => setActiveModal('uploadResume')}
+        <Link href="/app/resumes"
           className="flex flex-col items-start p-6 bg-white border border-[#E5E7EB] rounded-[24px] text-left hover:-translate-y-1 hover:shadow-md transition duration-200 cursor-pointer group">
           <div className="h-12 w-12 rounded-2xl bg-[#F3F1FF] text-[#6D5EF5] flex items-center justify-center mb-4 transition duration-200 group-hover:scale-105">
             <FileText className="h-6 w-6" />
           </div>
           <h4 className="font-black text-sm text-[#111827]">Upload Resume</h4>
           <p className="text-xs text-[#6B7280] font-semibold mt-1">Store a new resume version or PDF variation.</p>
-        </button>
+        </Link>
 
-        <button onClick={() => setActiveModal('scheduleInterview')}
+        <Link href="/app/interviews"
           className="flex flex-col items-start p-6 bg-white border border-[#E5E7EB] rounded-[24px] text-left hover:-translate-y-1 hover:shadow-md transition duration-200 cursor-pointer group">
           <div className="h-12 w-12 rounded-2xl bg-[#F3F1FF] text-[#6D5EF5] flex items-center justify-center mb-4 transition duration-200 group-hover:scale-105">
             <Calendar className="h-6 w-6" />
           </div>
           <h4 className="font-black text-sm text-[#111827]">Schedule Interview</h4>
           <p className="text-xs text-[#6B7280] font-semibold mt-1">Log a new interview date and details checklist.</p>
-        </button>
+        </Link>
 
-        <button onClick={() => setActiveModal('createReminder')}
+        <Link href="/app/reminders"
           className="flex flex-col items-start p-6 bg-white border border-[#E5E7EB] rounded-[24px] text-left hover:-translate-y-1 hover:shadow-md transition duration-200 cursor-pointer group">
           <div className="h-12 w-12 rounded-2xl bg-[#F3F1FF] text-[#6D5EF5] flex items-center justify-center mb-4 transition duration-200 group-hover:scale-105">
             <Clock className="h-6 w-6" />
           </div>
           <h4 className="font-black text-sm text-[#111827]">Create Reminder</h4>
-          <p className="text-xs text-[#6B7280] font-semibold mt-1">Schedule a follow-up, preparation task or deadline.</p>
-        </button>
+          <p className="text-xs text-[#6B7280] font-semibold mt-1">Quickly schedule follow-up alerts and task reminders.</p>
+        </Link>
       </div>
 
       {/* ── 4 & 5. CAREER PROGRESS + APPLICATION PIPELINE ── */}
