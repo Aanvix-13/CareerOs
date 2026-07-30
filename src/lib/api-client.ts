@@ -16,7 +16,7 @@ apiClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
     // If unauthorized, redirect to sign-in
-    if (error.response?.status === 401 && typeof window !== 'undefined' && !window.location.pathname.startsWith('/sign-in') && !window.location.pathname.startsWith('/sign-up')) {
+    if (error.response?.status === 401 && typeof window !== 'undefined' && !window.location.pathname.startsWith('/sign-in') && !window.location.pathname.startsWith('/sign-up') && !window.location.pathname.startsWith('/auth/redirect')) {
       window.location.href = '/sign-in';
     }
     return Promise.reject(error.response?.data?.error || { message: error.message });

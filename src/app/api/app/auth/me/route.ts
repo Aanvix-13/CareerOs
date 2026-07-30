@@ -4,7 +4,12 @@ import { withAuth } from '@/middleware/auth.middleware';
 
 export const GET = withAuth(async (request, user) => {
   try {
-    const profile = await profileService.getProfile(user.userId);
+    let profile = null;
+    try {
+      profile = await profileService.getProfile(user.userId);
+    } catch (e) {
+      console.warn('Profile not found for authenticated user:', user.userId);
+    }
     return successResponse({
       id: user.userId,
       email: user.email,

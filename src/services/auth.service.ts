@@ -20,7 +20,19 @@ export class AuthService {
     }
 
     // 2. If user is authenticated in Clerk but not synced yet, fetch full details from Clerk SDK
-    const clerkUser = await currentUser();
+    let clerkUser = null;
+    try {
+      const { clerkClient } = await import('@clerk/nextjs/server');
+      const client = typeof clerkClient === 'function' ? await (clerkClient as any)() : clerkClient;
+      clerkUser = await client.users.getUser(clerkUserId);
+    } catch (e) {
+      console.warn('Failed to retrieve user via clerkClient:', e);
+    }
+
+    if (!clerkUser) {
+      clerkUser = await currentUser();
+    }
+
     if (!clerkUser) {
       throw new AuthError('Authenticated Clerk user profile not found.');
     }

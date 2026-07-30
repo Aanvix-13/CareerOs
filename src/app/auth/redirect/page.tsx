@@ -9,7 +9,7 @@ export default function AuthRedirectPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const resolveRedirect = async () => {
+    const resolveRedirect = async (attemptsLeft = 5) => {
       try {
         // Fetch user data including role from our PostgreSQL database
         const response: any = await apiClient.get('/auth/me');
@@ -21,8 +21,13 @@ export default function AuthRedirectPage() {
           router.replace('/app/dashboard');
         }
       } catch (err) {
-        // If not authenticated or error, go to sign-in
-        router.replace('/sign-in');
+        if (attemptsLeft > 1) {
+          console.warn(`Auth sync failed. Retrying in 1.5s... (${attemptsLeft - 1} attempts left)`);
+          setTimeout(() => resolveRedirect(attemptsLeft - 1), 1500);
+        } else {
+          console.error('Auth sync failed completely. Redirecting to sign-in.', err);
+          router.replace('/sign-in');
+        }
       }
     };
 
