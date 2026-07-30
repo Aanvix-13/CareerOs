@@ -399,10 +399,13 @@ export default function DashboardPage() {
             </div>
 
             <div className="shrink-0 w-full sm:w-auto">
-              <Button as="a" href={nextAction.link} className="w-full sm:w-auto">
+              <Link
+                href={nextAction.link}
+                className="w-full sm:w-auto inline-flex items-center justify-center bg-[#6D5EF5] text-white font-bold hover:bg-[#5B4BE6] active:bg-[#4A3CCB] shadow-[0_4px_14px_rgba(109,94,245,0.25)] hover:shadow-[0_6px_20px_rgba(109,94,245,0.35)] text-sm px-6 py-3 rounded-[14px] gap-2 transition duration-200"
+              >
                 {nextAction.btnText}
                 <ChevronRight className="h-4 w-4" />
-              </Button>
+              </Link>
             </div>
           </Card>
 
