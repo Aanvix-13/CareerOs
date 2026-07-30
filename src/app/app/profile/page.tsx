@@ -18,10 +18,14 @@ import {
 } from 'lucide-react';
 import useAuthStore from '../../../hooks/useAuthStore';
 import useResumeStore from '../../../hooks/useResumeStore';
+import { useUser } from '@clerk/nextjs';
 
 export default function ProfilePage() {
+  const { user: clerkUser } = useUser();
   const { profile, updateProfile, error, checkSession } = useAuthStore();
   const { resumes, fetchResumes } = useResumeStore();
+
+  const displayName = clerkUser?.firstName || clerkUser?.username || clerkUser?.fullName || profile?.fullName || 'User';
   
   const [success, setSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -134,12 +138,12 @@ export default function ProfilePage() {
               {profile?.profileImageUrl ? (
                 <img src={profile.profileImageUrl} alt="profile" className="h-full w-full object-cover" />
               ) : (
-                profile?.fullName.charAt(0).toUpperCase()
+                displayName.charAt(0).toUpperCase()
               )}
             </div>
 
             <div className="space-y-1">
-              <h3 className="font-bold text-gray-900 text-base">{profile?.fullName}</h3>
+              <h3 className="font-bold text-gray-900 text-base">{displayName}</h3>
               <span className="text-xs text-gray-500 font-semibold uppercase tracking-wider">{profile?.preferredRole || 'General Target'}</span>
             </div>
 

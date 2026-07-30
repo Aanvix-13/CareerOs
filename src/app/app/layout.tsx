@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import useAuthStore from '../../hooks/useAuthStore';
 import useNotificationStore from '../../hooks/useNotificationStore';
-import { useClerk } from '@clerk/nextjs';
+import { useClerk, useUser } from '@clerk/nextjs';
 
 const navigation = [
   { name: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard },
@@ -43,6 +43,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const pathname = usePathname();
   const { profile, checkSession, isAuthenticated, logout, isLoading } = useAuthStore();
+  const { user: clerkUser } = useUser();
   const { notifications, unreadCount, fetchNotifications, markAsRead, markAllAsRead, deleteNotification } = useNotificationStore();
   const { signOut } = useClerk();
 
@@ -111,6 +112,8 @@ export default function DashboardLayout({
     await signOut();
     await logout();
   };
+
+  const userName = clerkUser?.firstName || clerkUser?.username || clerkUser?.fullName || profile?.fullName || 'User';
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-[#111827] flex flex-col md:flex-row relative font-[--font-sans]">
@@ -230,7 +233,7 @@ export default function DashboardLayout({
 
           {/* Welcome Text */}
           <div className="hidden sm:block text-sm text-[#4B5563] font-semibold">
-            Welcome back, <span className="text-[#111827] font-extrabold">{profile?.fullName}</span>
+            Welcome back, <span className="text-[#111827] font-extrabold">{userName}</span>
           </div>
 
           <div className="flex items-center gap-4 ml-auto">
@@ -318,11 +321,11 @@ export default function DashboardLayout({
                   {profile?.profileImageUrl ? (
                     <img src={profile.profileImageUrl} alt="avatar" className="h-full w-full object-cover" />
                   ) : (
-                    profile?.fullName.charAt(0).toUpperCase()
+                    userName.charAt(0).toUpperCase()
                   )}
                 </div>
                 <span className="hidden sm:inline text-xs font-bold text-[#4B5563]">
-                  {profile?.fullName.split(' ')[0]}
+                  {userName.split(' ')[0]}
                 </span>
                 <ChevronDown className="h-3 w-3 text-[#6B7280] hidden sm:block" />
               </button>
