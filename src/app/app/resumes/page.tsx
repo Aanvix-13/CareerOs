@@ -19,11 +19,22 @@ import {
 import useResumeStore from '../../../hooks/useResumeStore';
 
 export default function ResumesPage() {
-  const { resumes, fetchResumes, uploadResume, deleteResume, setDefault, error } = useResumeStore();
+  const { resumes, fetchResumes, uploadResume, updateResume, deleteResume, setDefault, error } = useResumeStore();
 
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
+
+  // Rename states
+  const [isRenameOpen, setIsRenameOpen] = useState(false);
+  const [selectedResumeForRename, setSelectedResumeForRename] = useState<any>(null);
+  const [renaming, setRenaming] = useState(false);
+  const [renameForm, setRenameForm] = useState({
+    name: '',
+    targetRole: '',
+    version: '',
+    notes: ''
+  });
 
   // Drag and drop states
   const [dragActive, setDragActive] = useState(false);
@@ -125,8 +136,32 @@ export default function ResumesPage() {
     }
   };
 
-  const handleRenameClick = () => {
-    alert('To rename a resume, please delete and upload a new file with your preferred name, or upload as a new version.');
+  const handleRenameClick = (resume: any) => {
+    setSelectedResumeForRename(resume);
+    setRenameForm({
+      name: resume.name || '',
+      targetRole: resume.targetRole || '',
+      version: resume.version || '',
+      notes: resume.notes || ''
+    });
+    setLocalError(null);
+    setIsRenameOpen(true);
+  };
+
+  const handleRenameSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedResumeForRename) return;
+    setRenaming(true);
+    setLocalError(null);
+    try {
+      await updateResume(selectedResumeForRename.id, renameForm);
+      setIsRenameOpen(false);
+      fetchResumes();
+    } catch (err: any) {
+      setLocalError(err.message || 'Failed to update resume.');
+    } finally {
+      setRenaming(false);
+    }
   };
 
   const formatBytes = (bytes: number) => {
@@ -272,8 +307,8 @@ export default function ResumesPage() {
 
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={handleRenameClick}
-                    className="text-gray-400 hover:text-gray-600 transition"
+                    onClick={() => handleRenameClick(resume)}
+                    className="text-gray-400 hover:text-gray-600 transition cursor-pointer"
                   >
                     Rename
                   </button>
@@ -403,6 +438,98 @@ export default function ResumesPage() {
                     </>
                   ) : (
                     'Upload'
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* RENAME/EDIT RESUME DETAILS MODAL */}
+      {isRenameOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white border border-gray-200 rounded-2xl w-full max-w-md p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-gray-200 pb-3">
+              <h3 className="font-bold text-lg text-gray-900 font-[--font-sans]">Edit Resume Details</h3>
+              <button onClick={() => setIsRenameOpen(false)} className="text-gray-500 hover:text-gray-900">
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {localError && (
+              <div className="rounded-lg bg-rose-600/10 border border-rose-600/20 p-3 text-xs text-rose-600 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                <span>{localError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleRenameSubmit} className="space-y-4 text-sm font-[--font-sans]">
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 font-bold">Resume Name</label>
+                <input
+                  type="text"
+                  required
+                  value={renameForm.name}
+                  onChange={(e) => setRenameForm({ ...renameForm, name: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-gray-900 focus:border-indigo-600 focus:outline-none font-bold"
+                  placeholder="e.g. Master Resume 2026"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 font-bold">Target Role</label>
+                  <input
+                    type="text"
+                    value={renameForm.targetRole}
+                    onChange={(e) => setRenameForm({ ...renameForm, targetRole: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
+                    placeholder="e.g. Frontend Engineer"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 font-bold">Version</label>
+                  <input
+                    type="text"
+                    value={renameForm.version}
+                    onChange={(e) => setRenameForm({ ...renameForm, version: e.target.value })}
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none font-semibold"
+                    placeholder="e.g. 1.2"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1 font-bold">Notes / Changelog</label>
+                <textarea
+                  rows={3}
+                  value={renameForm.notes}
+                  onChange={(e) => setRenameForm({ ...renameForm, notes: e.target.value })}
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
+                  placeholder="Add details about what is tailored in this version..."
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={() => setIsRenameOpen(false)}
+                  className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={renaming}
+                  className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-600 text-gray-900 font-semibold flex items-center gap-2 shadow-lg glow-indigo cursor-pointer"
+                >
+                  {renaming ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> Saving...
+                    </>
+                  ) : (
+                    'Save Changes'
                   )}
                 </button>
               </div>

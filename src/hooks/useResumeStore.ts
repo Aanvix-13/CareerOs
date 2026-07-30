@@ -20,6 +20,7 @@ interface ResumeState {
   error: string | null;
   fetchResumes: (options?: any) => Promise<void>;
   uploadResume: (formData: FormData) => Promise<Resume>;
+  updateResume: (id: string, data: any) => Promise<Resume>;
   deleteResume: (id: string) => Promise<void>;
   setDefault: (id: string) => Promise<void>;
 }
@@ -71,6 +72,22 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
       return resume;
     } catch (err: any) {
       set({ error: err.message || 'Failed to upload resume.', isLoading: false });
+      throw err;
+    }
+  },
+
+  updateResume: async (id, data) => {
+    set({ isLoading: true, error: null });
+    try {
+      const response: any = await apiClient.put(`/resumes/${id}`, data);
+      const updated = response.data;
+      set((state) => ({
+        resumes: state.resumes.map((r) => (r.id === id ? { ...r, ...updated } : r)),
+        isLoading: false,
+      }));
+      return updated;
+    } catch (err: any) {
+      set({ error: err.message || 'Failed to update resume.', isLoading: false });
       throw err;
     }
   },

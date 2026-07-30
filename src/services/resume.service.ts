@@ -97,13 +97,12 @@ export class ResumeService {
       );
     }
 
-    // 2. Cannot delete the only default resume if there are other resumes without setting one default first
+    // 2. Automatically set another resume as default if this one is default
     if (resume.isDefault) {
-      const { total } = await resumeRepository.findByUserId(userId, { limit: 2 });
-      if (total > 1) {
-        throw new ValidationError(
-          'Please set another resume as default first before deleting this default resume.'
-        );
+      const { resumes: otherResumes } = await resumeRepository.findByUserId(userId, { limit: 10 });
+      const nextDefault = otherResumes.find((r) => r.id !== resumeId);
+      if (nextDefault) {
+        await resumeRepository.setAsDefault(userId, nextDefault.id);
       }
     }
 
