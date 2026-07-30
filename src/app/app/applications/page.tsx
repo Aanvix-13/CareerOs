@@ -49,6 +49,7 @@ function ApplicationsContent() {
     updateStatus,
     deleteApplication,
     fetchHistory,
+    isLoading,
   } = useApplicationStore();
 
   const { resumes, fetchResumes } = useResumeStore();
@@ -277,6 +278,17 @@ function ApplicationsContent() {
     }
     return 0;
   });
+
+  if (isLoading && applications.length === 0) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center bg-[#FAFAFA]">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-[#6D5EF5]" />
+          <p className="text-[#6B7280] text-sm font-semibold font-[--font-sans]">Loading applications...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

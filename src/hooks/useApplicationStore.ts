@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import apiClient from '../lib/api-client';
 
 interface Application {
@@ -35,13 +36,15 @@ interface ApplicationState {
   fetchHistory: (id: string) => Promise<any[]>;
 }
 
-export const useApplicationStore = create<ApplicationState>((set, get) => ({
-  applications: [],
-  total: 0,
-  isLoading: false,
-  error: null,
+export const useApplicationStore = create<ApplicationState>()(
+  persist(
+    (set, get) => ({
+      applications: [],
+      total: 0,
+      isLoading: false,
+      error: null,
 
-  fetchApplications: async (options = {}) => {
+      fetchApplications: async (options = {}) => {
     set({ isLoading: true, error: null });
     try {
       const params = new URLSearchParams();
@@ -137,6 +140,13 @@ export const useApplicationStore = create<ApplicationState>((set, get) => ({
       throw err;
     }
   },
-}));
+}),
+{
+  name: 'application-storage',
+  storage: createJSONStorage(() => sessionStorage),
+  partialize: (state) => ({ applications: state.applications, total: state.total }),
+}
+)
+);
 
 export default useApplicationStore;

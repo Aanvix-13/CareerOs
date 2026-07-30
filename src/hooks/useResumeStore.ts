@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import apiClient from '../lib/api-client';
 
 interface Resume {
@@ -25,13 +26,15 @@ interface ResumeState {
   setDefault: (id: string) => Promise<void>;
 }
 
-export const useResumeStore = create<ResumeState>((set, get) => ({
-  resumes: [],
-  total: 0,
-  isLoading: false,
-  error: null,
+export const useResumeStore = create<ResumeState>()(
+  persist(
+    (set, get) => ({
+      resumes: [],
+      total: 0,
+      isLoading: false,
+      error: null,
 
-  fetchResumes: async (options = {}) => {
+      fetchResumes: async (options = {}) => {
     set({ isLoading: true, error: null });
     try {
       const params = new URLSearchParams();
@@ -122,6 +125,13 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
       throw err;
     }
   },
-}));
+}),
+{
+  name: 'resume-storage',
+  storage: createJSONStorage(() => sessionStorage),
+  partialize: (state) => ({ resumes: state.resumes, total: state.total }),
+}
+)
+);
 
 export default useResumeStore;

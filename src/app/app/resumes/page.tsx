@@ -19,7 +19,7 @@ import {
 import useResumeStore from '../../../hooks/useResumeStore';
 
 export default function ResumesPage() {
-  const { resumes, fetchResumes, uploadResume, updateResume, deleteResume, setDefault, error } = useResumeStore();
+  const { resumes, fetchResumes, uploadResume, updateResume, deleteResume, setDefault, error, isLoading } = useResumeStore();
 
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -171,6 +171,17 @@ export default function ResumesPage() {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
+
+  if (isLoading && resumes.length === 0) {
+    return (
+      <div className="flex h-[60vh] items-center justify-center bg-[#FAFAFA]">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-[#6D5EF5]" />
+          <p className="text-[#6B7280] text-sm font-semibold font-[--font-sans]">Loading resumes...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">
