@@ -296,14 +296,33 @@ export default function ResumesPage() {
 
               {/* Actions Footer */}
               <div className="flex items-center justify-between border-t border-gray-100 pt-3 mt-4 text-xs font-semibold">
-                <a
-                  href={resume.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-300"
+                <button
+                  onClick={() => {
+                    const fileUrl = resume.fileUrl;
+                    if (fileUrl.startsWith('data:')) {
+                      const win = window.open();
+                      if (win) {
+                        win.document.write(
+                          `<html>
+                            <head>
+                              <title>Preview - ${resume.name}</title>
+                              <style>body { margin: 0; padding: 0; }</style>
+                            </head>
+                            <body>
+                              <iframe src="${fileUrl}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%; position:fixed;" allowfullscreen></iframe>
+                            </body>
+                          </html>`
+                        );
+                        win.document.close();
+                      }
+                    } else {
+                      window.open(fileUrl, '_blank');
+                    }
+                  }}
+                  className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-300 cursor-pointer"
                 >
                   <Eye className="h-4 w-4" /> Preview / View
-                </a>
+                </button>
 
                 <div className="flex items-center gap-3">
                   <button
