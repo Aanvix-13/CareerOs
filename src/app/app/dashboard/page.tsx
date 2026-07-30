@@ -26,6 +26,7 @@ import useReminderStore from '../../../hooks/useReminderStore';
 import useAuthStore from '../../../hooks/useAuthStore';
 import useResumeStore from '../../../hooks/useResumeStore';
 import { Card, Button, Badge, PageHeader, StatCard, Divider } from '../../../components/ui';
+import { useUser } from '@clerk/nextjs';
 
 // Achievements configuration
 const ACHIEVEMENTS = [
@@ -37,6 +38,7 @@ const ACHIEVEMENTS = [
 ];
 
 export default function DashboardPage() {
+  const { user: clerkUser } = useUser();
   const { completeReminder } = useReminderStore();
   const { profile, user: authUser } = useAuthStore();
   const { resumes, fetchResumes } = useResumeStore();
@@ -149,7 +151,7 @@ export default function DashboardPage() {
     recentApplications = [],
   } = data || {};
 
-  const userName = profile?.fullName || authUser?.email?.split('@')[0] || 'User';
+  const userName = clerkUser?.firstName || clerkUser?.username || clerkUser?.fullName || profile?.fullName || authUser?.email?.split('@')[0] || 'User';
 
   // --- Dynamic calculations for the Smart Career Assistant ---
 
