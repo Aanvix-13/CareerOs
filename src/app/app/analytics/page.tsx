@@ -81,7 +81,7 @@ export default function AnalyticsPage() {
 
   // Status mapping colors
   const statusColors: Record<string, string> = {
-    Wishlist: 'bg-zinc-650',
+    Wishlist: 'bg-zinc-600',
     Preparing: 'bg-orange-500',
     Applied: 'bg-indigo-600',
     OnlineAssessment: 'bg-cyan-600',
@@ -90,7 +90,7 @@ export default function AnalyticsPage() {
     FinalInterview: 'bg-pink-500',
     OfferReceived: 'bg-emerald-600 glow-emerald',
     OfferAccepted: 'bg-emerald-600',
-    OfferDeclined: 'bg-zinc-550',
+    OfferDeclined: 'bg-zinc-500',
     Rejected: 'bg-rose-600',
     Withdrawn: 'bg-zinc-700',
     Archived: 'bg-gray-100',

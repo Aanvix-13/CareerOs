@@ -166,7 +166,7 @@ export default function InterviewsPage() {
     return (
       <div className="flex h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-650" />
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
           <p className="text-gray-500 text-sm">Loading interview schedules...</p>
         </div>
       </div>
@@ -186,7 +186,7 @@ export default function InterviewsPage() {
             fetchApplications({ limit: 100 });
             setIsAddModalOpen(true);
           }}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-650 hover:bg-indigo-700 px-4 py-2.5 text-sm font-bold text-white shadow-md transition duration-150 cursor-pointer self-start sm:self-center"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-4 py-2.5 text-sm font-bold text-white shadow-md transition duration-150 cursor-pointer self-start sm:self-center"
         >
           <CalendarRange className="h-4 w-4" />
           Schedule Interview
@@ -212,7 +212,7 @@ export default function InterviewsPage() {
               fetchApplications({ limit: 100 });
               setIsAddModalOpen(true);
             }}
-            className="inline-flex items-center gap-2 rounded-xl bg-indigo-650 hover:bg-indigo-700 px-4 py-2 text-xs font-bold text-white transition duration-150 cursor-pointer"
+            className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 px-4 py-2 text-xs font-bold text-white transition duration-150 cursor-pointer"
           >
             Schedule Interview
           </button>
@@ -301,7 +301,7 @@ export default function InterviewsPage() {
                     href={item.meetingLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-gray-250 bg-white hover:bg-gray-50 px-3 py-2 text-xs font-bold text-indigo-650 transition cursor-pointer"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-gray-250 bg-white hover:bg-gray-50 px-3 py-2 text-xs font-bold text-indigo-600 transition cursor-pointer"
                   >
                     Join {item.meetingPlatform || 'Video'}
                     <ExternalLink className="h-3.5 w-3.5" />
@@ -310,7 +310,7 @@ export default function InterviewsPage() {
                 
                 <button
                   onClick={() => handleOpenOutcome(item)}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-650 hover:bg-indigo-700 px-3 py-2 text-xs font-bold text-white transition shadow-sm cursor-pointer"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 px-3 py-2 text-xs font-bold text-white transition shadow-sm cursor-pointer"
                 >
                   <CheckSquare className="h-3.5 w-3.5" />
                   Log Outcome
@@ -357,7 +357,7 @@ export default function InterviewsPage() {
                     required
                     value={addForm.applicationId}
                     onChange={(e) => setAddForm({ ...addForm, applicationId: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-indigo-650 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-indigo-600 focus:outline-none"
                   >
                     <option value="">-- Choose an active application --</option>
                     {applications.map((app) => (
@@ -378,7 +378,7 @@ export default function InterviewsPage() {
                     placeholder="e.g. Technical Screen, Behavioral"
                     value={addForm.interviewRound}
                     onChange={(e) => setAddForm({ ...addForm, interviewRound: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-650 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -386,7 +386,7 @@ export default function InterviewsPage() {
                   <select
                     value={addForm.interviewType}
                     onChange={(e) => setAddForm({ ...addForm, interviewType: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-indigo-650 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-700 focus:border-indigo-600 focus:outline-none"
                   >
                     <option value="Online">Online / Video</option>
                     <option value="Phone">Phone</option>
@@ -403,7 +403,7 @@ export default function InterviewsPage() {
                     type="date"
                     value={addForm.scheduledDate}
                     onChange={(e) => setAddForm({ ...addForm, scheduledDate: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-650 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -413,7 +413,7 @@ export default function InterviewsPage() {
                     type="time"
                     value={addForm.scheduledTime}
                     onChange={(e) => setAddForm({ ...addForm, scheduledTime: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-650 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -423,7 +423,7 @@ export default function InterviewsPage() {
                     type="text"
                     value={addForm.timeZone}
                     onChange={(e) => setAddForm({ ...addForm, timeZone: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-650 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                   />
                 </div>
               </div>
@@ -436,7 +436,7 @@ export default function InterviewsPage() {
                     placeholder="e.g. Google Meet, Zoom"
                     value={addForm.meetingPlatform}
                     onChange={(e) => setAddForm({ ...addForm, meetingPlatform: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-650 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -446,7 +446,7 @@ export default function InterviewsPage() {
                     placeholder="https://..."
                     value={addForm.meetingLink}
                     onChange={(e) => setAddForm({ ...addForm, meetingLink: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-650 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                   />
                 </div>
               </div>
@@ -459,7 +459,7 @@ export default function InterviewsPage() {
                     placeholder="John Doe"
                     value={addForm.interviewerName}
                     onChange={(e) => setAddForm({ ...addForm, interviewerName: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-650 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                   />
                 </div>
                 <div>
@@ -469,7 +469,7 @@ export default function InterviewsPage() {
                     placeholder="john@company.com"
                     value={addForm.interviewerEmail}
                     onChange={(e) => setAddForm({ ...addForm, interviewerEmail: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-650 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                   />
                 </div>
               </div>
@@ -481,7 +481,7 @@ export default function InterviewsPage() {
                   placeholder="Topics to revise, coding topics, specific requirements..."
                   value={addForm.preparationNotes}
                   onChange={(e) => setAddForm({ ...addForm, preparationNotes: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-650 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                 />
               </div>
 
@@ -496,7 +496,7 @@ export default function InterviewsPage() {
                 <button
                   type="submit"
                   disabled={!addForm.applicationId || applications.length === 0}
-                  className="px-4 py-2 rounded-lg bg-indigo-650 hover:bg-indigo-700 text-white font-semibold disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold disabled:opacity-50"
                 >
                   Schedule Round
                 </button>
@@ -524,7 +524,7 @@ export default function InterviewsPage() {
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-600 focus:border-indigo-650 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-600 focus:border-indigo-600 focus:outline-none"
                   >
                     <option value="Scheduled">Scheduled</option>
                     <option value="Completed">Completed</option>
@@ -538,7 +538,7 @@ export default function InterviewsPage() {
                   <select
                     value={result}
                     onChange={(e) => setResult(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-600 focus:border-indigo-650 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-600 focus:border-indigo-600 focus:outline-none"
                   >
                     <option value="Pending">Pending</option>
                     <option value="Passed">Passed</option>
@@ -555,7 +555,7 @@ export default function InterviewsPage() {
                   rows={3}
                   value={questions}
                   onChange={(e) => setQuestions(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-650 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                   placeholder="Record questions asked during the round..."
                 />
               </div>
@@ -566,7 +566,7 @@ export default function InterviewsPage() {
                   rows={3}
                   value={feedback}
                   onChange={(e) => setFeedback(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-650 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-gray-200 bg-white text-gray-900 focus:border-indigo-600 focus:outline-none"
                   placeholder="Notes on performance, things to study, how it went..."
                 />
               </div>
@@ -581,7 +581,7 @@ export default function InterviewsPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-indigo-650 hover:bg-indigo-700 text-white font-semibold"
+                  className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold"
                 >
                   Save Logs
                 </button>
