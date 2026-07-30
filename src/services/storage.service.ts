@@ -27,10 +27,18 @@ export class StorageService {
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    await fs.writeFile(filePath, buffer);
-
-    const fileUrl = `/uploads/${fileName}`;
-    return { fileUrl, fileSize: file.size };
+    
+    try {
+      await fs.mkdir(this.uploadDir, { recursive: true });
+      await fs.writeFile(filePath, buffer);
+      const fileUrl = `/uploads/${fileName}`;
+      return { fileUrl, fileSize: file.size };
+    } catch (error) {
+      // Fallback for serverless (e.g. Vercel) read-only filesystem
+      const base64 = buffer.toString('base64');
+      const fileUrl = `data:${file.type || 'application/pdf'};base64,${base64}`;
+      return { fileUrl, fileSize: file.size };
+    }
   }
 
   async uploadProfileImage(file: File, userId: string): Promise<string> {
@@ -50,9 +58,16 @@ export class StorageService {
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    await fs.writeFile(filePath, buffer);
-
-    return `/uploads/${fileName}`;
+    
+    try {
+      await fs.mkdir(this.uploadDir, { recursive: true });
+      await fs.writeFile(filePath, buffer);
+      return `/uploads/${fileName}`;
+    } catch (error) {
+      // Fallback for serverless (e.g. Vercel) read-only filesystem
+      const base64 = buffer.toString('base64');
+      return `data:${file.type || 'image/png'};base64,${base64}`;
+    }
   }
 
   async deleteFile(fileUrl: string): Promise<void> {
