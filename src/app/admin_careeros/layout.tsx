@@ -88,7 +88,7 @@ export default function AdminLayout({
   }
 
   const handleLogout = async () => {
-    await signOut();
+    await signOut({ redirectUrl: '/' });
     await logout();
   };
 

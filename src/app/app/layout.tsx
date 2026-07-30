@@ -109,7 +109,7 @@ export default function DashboardLayout({
   }
 
   const handleLogout = async () => {
-    await signOut();
+    await signOut({ redirectUrl: '/' });
     await logout();
   };
 
