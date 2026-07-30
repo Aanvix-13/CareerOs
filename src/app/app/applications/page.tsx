@@ -61,6 +61,7 @@ function ApplicationsContent() {
   const [workMode, setWorkMode] = useState('');
   const [source, setSource] = useState('');
   const [sortBy, setSortBy] = useState('Newest');
+  const [statusFilter, setStatusFilter] = useState('');
   
   // Search Suggestions State
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -244,6 +245,7 @@ function ApplicationsContent() {
 
     const matchesJobType = !jobType || app.jobType === jobType;
     const matchesWorkMode = !workMode || app.workMode === workMode;
+    const matchesStatus = !statusFilter || app.currentStatus === statusFilter;
     
     // Support Referral filtering
     let matchesSource = true;
@@ -255,7 +257,7 @@ function ApplicationsContent() {
       matchesSource = !!app.source && app.source.toLowerCase().includes(source.toLowerCase());
     }
 
-    return matchesSearch && matchesJobType && matchesWorkMode && matchesSource;
+    return matchesSearch && matchesJobType && matchesWorkMode && matchesSource && matchesStatus;
   });
 
   // 7. Better Filtering: Sort By handler
@@ -278,6 +280,26 @@ function ApplicationsContent() {
     }
     return 0;
   });
+
+  const getStatusClasses = (status: string) => {
+    switch (status) {
+      case 'OfferReceived':
+      case 'OfferAccepted':
+        return 'bg-emerald-50 border-emerald-200 text-emerald-700';
+      case 'Rejected':
+      case 'OfferDeclined':
+        return 'bg-rose-50 border-rose-200 text-rose-700';
+      case 'Applied':
+      case 'OnlineAssessment':
+        return 'bg-indigo-50 border-indigo-200 text-indigo-700';
+      case 'TechnicalInterview':
+      case 'HRInterview':
+      case 'FinalInterview':
+        return 'bg-amber-50 border-amber-200 text-amber-700';
+      default:
+        return 'bg-gray-50 border-gray-250 text-gray-700';
+    }
+  };
 
   if (isLoading && applications.length === 0) {
     return (
@@ -351,9 +373,9 @@ function ApplicationsContent() {
         </div>
 
         {/* Collapsible expanded filter row */}
-        <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 pt-2 border-t border-gray-200/40 lg:grid ${showFiltersMobile ? 'grid' : 'hidden lg:grid'}`}>
+        <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 pt-2 border-t border-gray-200/40 lg:grid ${showFiltersMobile ? 'grid' : 'hidden lg:grid'}`}>
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider pl-1">Job Type</span>
+            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider pl-1 font-bold">Job Type</span>
             <select
               value={jobType}
               onChange={(e) => setJobType(e.target.value)}
@@ -369,7 +391,7 @@ function ApplicationsContent() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider pl-1">Work Mode</span>
+            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider pl-1 font-bold">Work Mode</span>
             <select
               value={workMode}
               onChange={(e) => setWorkMode(e.target.value)}
@@ -383,7 +405,7 @@ function ApplicationsContent() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider pl-1">Origin / Source</span>
+            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider pl-1 font-bold">Origin / Source</span>
             <select
               value={source}
               onChange={(e) => setSource(e.target.value)}
@@ -396,7 +418,31 @@ function ApplicationsContent() {
           </div>
 
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider pl-1">Sort By</span>
+            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider pl-1 font-bold">Status</span>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 text-gray-600 px-3 py-2.5 focus:border-indigo-600 focus:outline-none text-xs cursor-pointer"
+            >
+              <option value="">All Statuses</option>
+              <option value="Wishlist">Wishlist</option>
+              <option value="Preparing">Preparing</option>
+              <option value="Applied">Applied</option>
+              <option value="OnlineAssessment">Online Assessment</option>
+              <option value="TechnicalInterview">Technical Interview</option>
+              <option value="HRInterview">HR Interview</option>
+              <option value="FinalInterview">Final Interview</option>
+              <option value="OfferReceived">Offer Received</option>
+              <option value="OfferAccepted">Offer Accepted</option>
+              <option value="OfferDeclined">Offer Declined</option>
+              <option value="Rejected">Rejected</option>
+              <option value="Withdrawn">Withdrawn</option>
+              <option value="Archived">Archived</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider pl-1 font-bold">Sort By</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
@@ -428,137 +474,88 @@ function ApplicationsContent() {
           </button>
         </div>
       ) : (
-        /* Kanban Board View */
-        <div className="overflow-x-auto pb-4">
-          <div className="flex gap-4 min-w-[1280px] px-1">
-            {PIPELINE_COLUMNS.map((column) => {
-              const columnApps = sortedApps.filter((app) => app.currentStatus === column.key);
-              return (
-                <div key={column.key} className="flex-1 min-w-[310px] bg-white/10 rounded-2xl border border-gray-200 p-3 flex flex-col min-h-[65vh]">
-                  {/* Column Header */}
-                  <div className={`flex items-center justify-between border-b pb-2.5 mb-4 ${column.color}`}>
-                    <span className="font-bold text-sm text-gray-700">{column.label}</span>
-                    <span className="h-5 w-5 rounded-full bg-white border border-gray-200 flex items-center justify-center text-[10px] text-gray-500 font-bold">
-                      {columnApps.length}
-                    </span>
+        /* Grid Card View */
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in font-[--font-sans]">
+          {sortedApps.map((app) => (
+            <div
+              key={app.id}
+              onClick={() => handleOpenDetail(app)}
+              className="bg-white border border-gray-200 rounded-[24px] p-5 flex flex-col justify-between h-[270px] hover:-translate-y-1 hover:shadow-lg transition duration-200 cursor-pointer"
+            >
+              <div>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-10 w-10 rounded-2xl bg-[#F3F1FF] text-[#6D5EF5] border border-indigo-100 flex items-center justify-center font-extrabold text-sm shrink-0 uppercase">
+                      {app.companyName.charAt(0)}
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="font-black text-gray-900 text-sm truncate max-w-[155px]">{app.companyName}</h4>
+                      <p className="text-xs text-gray-500 font-semibold truncate max-w-[155px]">{app.jobTitle}</p>
+                    </div>
                   </div>
+                  <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider ${getStatusClasses(app.currentStatus)}`}>
+                    {app.currentStatus}
+                  </span>
+                </div>
 
-                  {/* 1. Improved Kanban Cards with hover translate and rich fields */}
-                  <div className="flex-1 space-y-3 overflow-y-auto max-h-[62vh] scrollbar-thin">
-                    {columnApps.length === 0 ? (
-                      <div className="h-16 border border-dashed border-gray-200/60 rounded-xl flex items-center justify-center text-[11px] text-gray-400">
-                        Drag applications here
-                      </div>
-                    ) : (
-                      columnApps.map((app) => (
-                        <div
-                          key={app.id}
-                          onClick={() => handleOpenDetail(app)}
-                          className="p-4 rounded-xl border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 hover:-translate-y-1 hover:shadow-lg transition duration-200 cursor-pointer flex flex-col gap-3.5 group relative"
-                        >
-                          {/* Header: Logo placeholder & Company name */}
-                          <div className="flex items-start gap-3">
-                            <div className="h-8 w-8 rounded-lg bg-gray-100 text-gray-600 border border-gray-300/50 flex items-center justify-center font-extrabold text-sm shrink-0 uppercase">
-                              {app.companyName.charAt(0)}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <h4 className="font-bold text-gray-900 text-xs group-hover:text-indigo-600 transition duration-150 truncate">
-                                {app.companyName}
-                              </h4>
-                              <p className="text-[10px] text-gray-500 truncate">{app.jobTitle}</p>
-                            </div>
-                          </div>
-
-                          {/* Expanded Fields */}
-                          <div className="text-[10px] space-y-1.5 border-t border-gray-200/40 pt-2.5">
-                            <div className="flex justify-between items-center text-gray-400">
-                              <span>Location & Mode</span>
-                              <span className="text-gray-600 font-medium truncate max-w-[120px]">
-                                {app.location || 'Remote'} ({app.workMode})
-                              </span>
-                            </div>
-
-                            <div className="flex justify-between items-center text-gray-400">
-                              <span>Job Type</span>
-                              <span className="text-gray-600 font-medium">
-                                {app.jobType === 'FullTime' ? 'Full-time' : app.jobType}
-                              </span>
-                            </div>
-
-                            {app.salary && (
-                              <div className="flex justify-between items-center text-gray-400">
-                                <span>Salary</span>
-                                <span className="text-emerald-600 font-semibold">
-                                  {parseFloat(app.salary.toString()).toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}
-                                </span>
-                              </div>
-                            )}
-
-                            {app.resume && (
-                              <div className="flex justify-between items-center text-gray-400">
-                                <span>Resume Version</span>
-                                <span className="text-indigo-600 truncate max-w-[120px]" title={app.resume.name}>
-                                  {app.resume.name}
-                                </span>
-                              </div>
-                            )}
-
-                            <div className="flex justify-between items-center text-gray-400">
-                              <span>Applied On</span>
-                              <span className="text-gray-500">
-                                {new Date(app.applicationDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Quick Actions Footer */}
-                          <div className="flex items-center justify-between border-t border-gray-200/40 pt-2.5 mt-0.5 gap-2">
-                            <span className="inline-flex items-center rounded-full bg-gray-100 border border-gray-300/60 px-2 py-0.5 text-[8px] font-semibold text-gray-500 uppercase">
-                              {app.currentStatus}
-                            </span>
-
-                            <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                              <button
-                                title="Edit Application"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleOpenDetail(app);
-                                }}
-                                className="p-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 transition"
-                              >
-                                <Settings className="h-3 w-3" />
-                              </button>
-                              <button
-                                title="Schedule Interview"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedApp(app);
-                                  setIsScheduleOpen(true);
-                                }}
-                                className="p-1 rounded bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-900 transition"
-                              >
-                                <CalendarRange className="h-3 w-3" />
-                              </button>
-                              <button
-                                title="Delete"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteApp(app.id);
-                                }}
-                                className="p-1 rounded bg-rose-950/20 hover:bg-rose-900/40 text-rose-600 transition"
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
+                <div className="text-xs text-gray-500 space-y-1.5 border-t border-gray-250/20 pt-3 mt-3.5 font-semibold">
+                  <div className="flex items-center justify-between">
+                    <span>Location & Mode:</span>
+                    <span className="font-semibold text-gray-700 truncate max-w-[170px]">{app.location || 'Remote'} ({app.workMode})</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span>Job Type:</span>
+                    <span className="font-semibold text-gray-700">{app.jobType === 'FullTime' ? 'Full Time' : app.jobType}</span>
+                  </div>
+                  {app.salary && (
+                    <div className="flex items-center justify-between">
+                      <span>Salary:</span>
+                      <span className="font-extrabold text-emerald-600">
+                        {parseFloat(app.salary.toString()).toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 })}
+                      </span>
+                    </div>
+                  )}
+                  {app.resume && (
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5"><FileText className="h-3.5 w-3.5 text-gray-400" /> Linked Resume:</span>
+                      <span className="font-semibold text-[#6D5EF5] truncate max-w-[150px]" title={app.resume.name}>
+                        {app.resume.name}
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <span>Applied Date:</span>
+                    <span className="font-semibold text-gray-500">{new Date(app.applicationDate).toLocaleDateString()}</span>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+
+              {/* Actions Footer */}
+              <div className="flex items-center justify-between border-t border-gray-100 pt-3 mt-4 text-xs font-semibold">
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleOpenDetail(app); }}
+                  className="text-[#6D5EF5] hover:underline cursor-pointer"
+                >
+                  View Details
+                </button>
+                
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setSelectedApp(app); setInterviewRound('Technical'); setIsScheduleOpen(true); }}
+                    className="text-[10px] text-gray-500 hover:text-gray-900 border border-gray-200 hover:border-gray-300 rounded-lg px-2 py-0.5 transition cursor-pointer"
+                  >
+                    Schedule Interview
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDeleteApp(app.id); }}
+                    className="text-rose-600 hover:text-rose-600 hover:bg-rose-950/10 p-1.5 rounded transition cursor-pointer"
+                  >
+                    <Trash2 className="h-4 w-4 animate-pulse" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
