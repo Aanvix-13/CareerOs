@@ -843,6 +843,12 @@ export default function DashboardPage() {
               <option value="TechnicalInterview">Technical Interview</option>
               <option value="HRInterview">HR Interview</option>
               <option value="FinalInterview">Final Interview</option>
+              <option value="OfferReceived">Offer Received</option>
+              <option value="OfferAccepted">Offer Accepted</option>
+              <option value="OfferDeclined">Offer Declined</option>
+              <option value="Rejected">Rejected</option>
+              <option value="Withdrawn">Withdrawn</option>
+              <option value="Archived">Archived</option>
             </Select>
           </div>
           <div className="grid grid-cols-2 gap-4">
