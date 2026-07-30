@@ -25,7 +25,7 @@ export default function ProfilePage() {
   const { profile, updateProfile, error, checkSession } = useAuthStore();
   const { resumes, fetchResumes } = useResumeStore();
 
-  const displayName = clerkUser?.firstName || clerkUser?.username || clerkUser?.fullName || profile?.fullName || 'User';
+  const displayName = clerkUser?.fullName || [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(' ') || profile?.fullName || 'User';
   
   const [success, setSuccess] = useState(false);
   const [saving, setSaving] = useState(false);

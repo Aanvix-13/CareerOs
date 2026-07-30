@@ -151,7 +151,7 @@ export default function DashboardPage() {
     recentApplications = [],
   } = data || {};
 
-  const userName = clerkUser?.firstName || clerkUser?.username || clerkUser?.fullName || profile?.fullName || authUser?.email?.split('@')[0] || 'User';
+  const userName = clerkUser?.firstName || profile?.fullName?.split(' ')[0] || authUser?.email?.split('@')[0] || 'User';
 
   // --- Dynamic calculations for the Smart Career Assistant ---
 

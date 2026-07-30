@@ -113,7 +113,7 @@ export default function DashboardLayout({
     await logout();
   };
 
-  const userName = clerkUser?.firstName || clerkUser?.username || clerkUser?.fullName || profile?.fullName || 'User';
+  const userName = clerkUser?.fullName || [clerkUser?.firstName, clerkUser?.lastName].filter(Boolean).join(' ') || profile?.fullName || 'User';
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-[#111827] flex flex-col md:flex-row relative font-[--font-sans]">
