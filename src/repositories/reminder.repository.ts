@@ -96,11 +96,15 @@ export class ReminderRepository {
   }
 
   async markCompleted(id: string): Promise<Reminder> {
+    const existing = await prisma.reminder.findUnique({
+      where: { id },
+    });
+    const isCompleted = existing?.status === 'Completed';
     return prisma.reminder.update({
       where: { id },
       data: {
-        status: 'Completed',
-        completedAt: new Date(),
+        status: isCompleted ? 'Pending' : 'Completed',
+        completedAt: isCompleted ? null : new Date(),
       },
     });
   }

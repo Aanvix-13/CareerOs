@@ -35,14 +35,14 @@ export default function RemindersPage() {
 
   const { register, handleSubmit, reset } = useForm();
 
-  const loadReminders = async () => {
-    setLoading(true);
+  const loadReminders = async (silent = false) => {
+    if (!silent) setLoading(true);
     await fetchReminders({
       status: status || undefined,
       priority: priority || undefined,
       reminderType: reminderType || undefined,
     });
-    setLoading(false);
+    if (!silent) setLoading(false);
   };
 
   useEffect(() => {
@@ -81,7 +81,7 @@ export default function RemindersPage() {
   const handleComplete = async (id: string) => {
     try {
       await completeReminder(id);
-      loadReminders();
+      loadReminders(true);
     } catch (err: any) {
       alert(err.message || 'Failed to complete task.');
     }
@@ -91,7 +91,7 @@ export default function RemindersPage() {
     if (!confirm('Are you sure you want to delete this reminder?')) return;
     try {
       await deleteReminder(id);
-      loadReminders();
+      loadReminders(true);
     } catch (err: any) {
       alert(err.message || 'Failed to delete reminder.');
     }

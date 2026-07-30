@@ -95,7 +95,7 @@ export const useReminderStore = create<ReminderState>((set, get) => ({
       const response: any = await apiClient.patch(`/reminders/${id}/complete`);
       const updated = response.data;
       set((state) => ({
-        reminders: state.reminders.map((item) => (item.id === id ? { ...item, status: 'Completed', completedAt: updated.completedAt } : item)),
+        reminders: state.reminders.map((item) => (item.id === id ? updated : item)),
       }));
       return updated;
     } catch (err: any) {

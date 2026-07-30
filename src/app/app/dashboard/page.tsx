@@ -65,15 +65,15 @@ export default function DashboardPage() {
 
   const [actionLoading, setActionLoading] = useState(false);
 
-  const fetchDashboard = async () => {
+  const fetchDashboard = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const response: any = await apiClient.get('/dashboard');
       setDashboardData(response.data);
     } catch (err: any) {
       setError(err.message || 'Failed to load dashboard metrics.');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -149,7 +149,7 @@ export default function DashboardPage() {
         salary: appForm.salary ? parseFloat(appForm.salary) : null
       });
       setActiveModal(null);
-      fetchDashboard();
+      fetchDashboard(true);
     } catch (err: any) {
       alert(err.message || 'Failed to create application.');
     } finally {
@@ -171,7 +171,7 @@ export default function DashboardPage() {
 
       await uploadResume(data);
       setActiveModal(null);
-      fetchDashboard();
+      fetchDashboard(true);
     } catch (err: any) {
       alert(err.message || 'Failed to upload resume.');
     } finally {
@@ -186,7 +186,7 @@ export default function DashboardPage() {
     try {
       await scheduleInterview(interviewForm);
       setActiveModal(null);
-      fetchDashboard();
+      fetchDashboard(true);
     } catch (err: any) {
       alert(err.message || 'Failed to schedule interview.');
     } finally {
@@ -203,7 +203,7 @@ export default function DashboardPage() {
         applicationId: reminderForm.applicationId || null
       });
       setActiveModal(null);
-      fetchDashboard();
+      fetchDashboard(true);
     } catch (err: any) {
       alert(err.message || 'Failed to create reminder.');
     } finally {
@@ -218,7 +218,7 @@ export default function DashboardPage() {
     try {
       await updateReminder(selectedReminderForEdit.id, selectedReminderForEdit);
       setActiveModal(null);
-      fetchDashboard();
+      fetchDashboard(true);
     } catch (err: any) {
       alert(err.message || 'Failed to update reminder.');
     } finally {
@@ -229,7 +229,7 @@ export default function DashboardPage() {
   const handleToggleReminder = async (id: string) => {
     try {
       await completeReminder(id);
-      fetchDashboard();
+      fetchDashboard(true);
     } catch (err) {
       // Ignored
     }
@@ -239,7 +239,7 @@ export default function DashboardPage() {
     if (!confirm('Are you sure you want to delete this task?')) return;
     try {
       await deleteReminder(id);
-      fetchDashboard();
+      fetchDashboard(true);
     } catch (err) {
       // Ignored
     }
@@ -262,7 +262,7 @@ export default function DashboardPage() {
         <AlertTriangle className="h-10 w-10 text-[#EF4444] mx-auto mb-3" />
         <h3 className="font-bold text-[#111827] mb-1">Failed to load data</h3>
         <p className="text-[#4B5563] text-sm mb-6">{error}</p>
-        <Button variant="danger" size="sm" onClick={fetchDashboard}>Try again</Button>
+        <Button variant="danger" size="sm" onClick={() => fetchDashboard()}>Try again</Button>
       </div>
     );
   }
