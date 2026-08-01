@@ -19,10 +19,14 @@ import {
   Briefcase,
   Loader2,
   ChevronDown,
+  CreditCard,
+  Gauge,
+  Sparkles,
 } from 'lucide-react';
 import useAuthStore from '../../hooks/useAuthStore';
 import useNotificationStore from '../../hooks/useNotificationStore';
 import { useClerk, useUser } from '@clerk/nextjs';
+import UpgradeModal from '../../components/UpgradeModal';
 
 const navigation = [
   { name: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard },
@@ -33,6 +37,9 @@ const navigation = [
   { name: 'Analytics', href: '/app/analytics', icon: TrendingUp },
   { name: 'Feedback', href: '/app/feedback', icon: MessageSquare },
   { name: 'Profile', href: '/app/profile', icon: User },
+  { name: 'Usage', href: '/app/settings/usage', icon: Gauge },
+  { name: 'Billing', href: '/app/settings/billing', icon: CreditCard },
+  { name: 'AI Workspace', href: '/app/settings/ai', icon: Sparkles },
 ];
 
 export default function DashboardLayout({
@@ -54,6 +61,32 @@ export default function DashboardLayout({
 
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  const [limitModalOpen, setLimitModalOpen] = useState(false);
+  const [limitModalData, setLimitModalData] = useState<{
+    feature: string;
+    currentUsage: number;
+    limit: number;
+    currentPlan: string;
+    recommendedPlan: 'PRO' | 'ELITE';
+  } | null>(null);
+
+  useEffect(() => {
+    function handleLimitExceeded(e: Event) {
+      const data = (e as CustomEvent).detail;
+      setLimitModalData({
+        feature: data.feature,
+        currentUsage: data.currentUsage,
+        limit: data.limit,
+        currentPlan: data.currentPlan,
+        recommendedPlan: data.recommendedPlan
+      });
+      setLimitModalOpen(true);
+    }
+    
+    window.addEventListener('limit-exceeded', handleLimitExceeded);
+    return () => window.removeEventListener('limit-exceeded', handleLimitExceeded);
+  }, []);
 
   // Close menus when clicking outside
   useEffect(() => {
@@ -381,6 +414,17 @@ export default function DashboardLayout({
           );
         })}
       </nav>
+      {limitModalData && (
+        <UpgradeModal
+          isOpen={limitModalOpen}
+          onClose={() => setLimitModalOpen(false)}
+          featureName={limitModalData.feature}
+          currentUsage={limitModalData.currentUsage}
+          planLimit={limitModalData.limit}
+          currentPlan={limitModalData.currentPlan}
+          recommendedPlan={limitModalData.recommendedPlan}
+        />
+      )}
     </div>
   );
 }

@@ -6,6 +6,8 @@ import { withAuth } from '@/middleware/auth.middleware';
 import { getPaginationParams, formatPaginatedResult } from '@/utils/pagination';
 import { InterviewStatus, InterviewResult } from '@prisma/client';
 
+import { withFeatureGate } from '@/middleware/subscription.middleware';
+
 export const GET = withAuth(async (request, user) => {
   try {
     const { searchParams } = new URL(request.url);
@@ -34,7 +36,7 @@ export const GET = withAuth(async (request, user) => {
   }
 });
 
-export const POST = withAuth(async (request, user) => {
+export const POST = withFeatureGate('INTERVIEWS', async (request, user) => {
   try {
     const body = await request.json();
     const result = createInterviewSchema.safeParse(body);

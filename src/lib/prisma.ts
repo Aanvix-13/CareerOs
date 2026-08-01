@@ -21,10 +21,24 @@ if (process.env.NODE_ENV === 'production') {
   const adapter = new PrismaPg(pool);
 
   if (!globalForPrisma.prisma) {
-    globalForPrisma.prisma = new PrismaClient({
+    const client = new PrismaClient({
       adapter,
-      log: ['query', 'error', 'warn'],
+      log: [
+        { emit: 'event', level: 'query' },
+        'error',
+        'warn',
+      ],
+    }) as any;
+
+    client.$on('query', (e: any) => {
+      if (e.duration >= 100) {
+        console.warn(`\x1b[33m[PRISMA SLOW QUERY] ${e.duration}ms\x1b[0m | Query: ${e.query}`);
+      } else {
+        console.log(`[PRISMA QUERY] ${e.duration}ms | Query: ${e.query}`);
+      }
     });
+
+    globalForPrisma.prisma = client as PrismaClient;
   }
   prisma = globalForPrisma.prisma;
 }

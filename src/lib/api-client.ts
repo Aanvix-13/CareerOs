@@ -19,7 +19,13 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401 && typeof window !== 'undefined' && !window.location.pathname.startsWith('/sign-in') && !window.location.pathname.startsWith('/sign-up') && !window.location.pathname.startsWith('/auth/redirect')) {
       window.location.href = '/sign-in';
     }
-    return Promise.reject(error.response?.data?.error || { message: error.message });
+
+    // Intercept limit exceeded errors
+    if (error.response?.status === 409 && error.response?.data?.code === 'LIMIT_EXCEEDED' && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('limit-exceeded', { detail: error.response.data }));
+    }
+
+    return Promise.reject(error.response?.data?.error || error.response?.data || { message: error.message });
   }
 );
 

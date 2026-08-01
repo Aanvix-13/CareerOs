@@ -2,7 +2,8 @@ import reminderRepository from '../repositories/reminder.repository';
 import applicationRepository from '../repositories/application.repository';
 import interviewRepository from '../repositories/interview.repository';
 import { Reminder, ReminderPriority, ReminderStatus, ReminderType } from '@prisma/client';
-import { ForbiddenError, NotFoundError } from '../lib/errors';
+import { ForbiddenError, NotFoundError, ConflictError } from '../lib/errors';
+import usageService from './usage.service';
 
 export class ReminderService {
   async createReminder(
@@ -25,10 +26,23 @@ export class ReminderService {
       }
     }
 
-    return reminderRepository.create({
-      ...data,
-      userId,
-    });
+    // 3. Check and increment limit (for active status)
+    const isCompleted = data.status === 'Completed';
+    if (!isCompleted) {
+      await usageService.incrementUsage(userId, 'REMINDERS');
+    }
+
+    try {
+      return await reminderRepository.create({
+        ...data,
+        userId,
+      });
+    } catch (error) {
+      if (!isCompleted) {
+        await usageService.decrementUsage(userId, 'REMINDERS');
+      }
+      throw error;
+    }
   }
 
   async updateReminder(
@@ -42,6 +56,15 @@ export class ReminderService {
     }
     if (reminder.userId !== userId) {
       throw new ForbiddenError();
+    }
+
+    // If changing status from Completed to active (Pending/Overdue), check limits
+    const isNewActive = data.status && data.status !== 'Completed' && reminder.status === 'Completed';
+    if (isNewActive) {
+      const canActivate = await usageService.checkLimit(userId, 'REMINDERS');
+      if (!canActivate) {
+        throw new ConflictError('Active reminder limit reached for your plan. Please upgrade to continue.');
+      }
     }
 
     // Verify application

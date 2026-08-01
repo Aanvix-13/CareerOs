@@ -2,6 +2,7 @@ import interviewRepository from '../repositories/interview.repository';
 import applicationRepository from '../repositories/application.repository';
 import { Interview, InterviewStatus, InterviewResult } from '@prisma/client';
 import { ForbiddenError, NotFoundError } from '../lib/errors';
+import usageService from './usage.service';
 
 export class InterviewService {
   async createInterview(
@@ -17,7 +18,15 @@ export class InterviewService {
       throw new ForbiddenError('You can only schedule interviews for your own applications.');
     }
 
-    return interviewRepository.create(data);
+    // 2. Increment usage (enforces limit)
+    await usageService.incrementUsage(userId, 'INTERVIEWS');
+
+    try {
+      return await interviewRepository.create(data);
+    } catch (error) {
+      await usageService.decrementUsage(userId, 'INTERVIEWS');
+      throw error;
+    }
   }
 
   async updateInterview(
@@ -91,7 +100,9 @@ export class InterviewService {
       throw new ForbiddenError();
     }
 
-    return interviewRepository.delete(id);
+    const deleted = await interviewRepository.delete(id);
+    await usageService.decrementUsage(userId, 'INTERVIEWS');
+    return deleted;
   }
 }
 

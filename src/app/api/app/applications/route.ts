@@ -6,6 +6,8 @@ import { withAuth } from '@/middleware/auth.middleware';
 import { getPaginationParams, formatPaginatedResult } from '@/utils/pagination';
 import { ApplicationStatus } from '@prisma/client';
 
+import { withFeatureGate } from '@/middleware/subscription.middleware';
+
 export const GET = withAuth(async (request, user) => {
   try {
     const { searchParams } = new URL(request.url);
@@ -38,7 +40,7 @@ export const GET = withAuth(async (request, user) => {
   }
 });
 
-export const POST = withAuth(async (request, user) => {
+export const POST = withFeatureGate('APPLICATIONS', async (request, user) => {
   try {
     const body = await request.json();
     const result = createApplicationSchema.safeParse(body);

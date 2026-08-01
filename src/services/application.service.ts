@@ -2,6 +2,7 @@ import applicationRepository from '../repositories/application.repository';
 import resumeRepository from '../repositories/resume.repository';
 import { Application, ApplicationStatus, ApplicationStatusHistory } from '@prisma/client';
 import { ForbiddenError, NotFoundError } from '../lib/errors';
+import usageService from './usage.service';
 
 export class ApplicationService {
   async createApplication(
@@ -18,13 +19,21 @@ export class ApplicationService {
       throw new ForbiddenError('You can only link your own resumes.');
     }
 
-    return applicationRepository.create(
-      {
-        ...data,
-        userId,
-      },
-      historyNotes
-    );
+    // 2. Increment usage (enforces limit)
+    await usageService.incrementUsage(userId, 'APPLICATIONS');
+
+    try {
+      return await applicationRepository.create(
+        {
+          ...data,
+          userId,
+        },
+        historyNotes
+      );
+    } catch (error) {
+      await usageService.decrementUsage(userId, 'APPLICATIONS');
+      throw error;
+    }
   }
 
   async updateApplication(
@@ -106,7 +115,9 @@ export class ApplicationService {
       throw new ForbiddenError();
     }
 
-    return applicationRepository.delete(id);
+    const deleted = await applicationRepository.delete(id);
+    await usageService.decrementUsage(userId, 'APPLICATIONS');
+    return deleted;
   }
 
   async getStatusHistory(userId: string, id: string): Promise<ApplicationStatusHistory[]> {

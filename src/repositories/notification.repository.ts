@@ -2,7 +2,7 @@ import prisma from '../lib/prisma';
 import { Notification, NotificationStatus } from '@prisma/client';
 
 export class NotificationRepository {
-  async create(data: Omit<Notification, 'id' | 'createdAt' | 'updatedAt' | 'readAt'>): Promise<Notification> {
+  async create(data: Omit<Notification, 'id' | 'createdAt' | 'updatedAt' | 'readAt' | 'deletedAt'>): Promise<Notification> {
     return prisma.notification.create({
       data,
     });
@@ -16,18 +16,26 @@ export class NotificationRepository {
 
   async findByUserId(
     userId: string,
-    options: { status?: NotificationStatus; skip?: number; limit?: number }
+    options: { status?: NotificationStatus; skip?: number; limit?: number; cursorId?: string }
   ): Promise<{ notifications: Notification[]; total: number }> {
-    const where: Record<string, any> = { userId };
+    const where: Record<string, any> = { userId, deletedAt: null };
     if (options.status) where.status = options.status;
 
+    const queryOptions: any = {
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: options.limit,
+    };
+
+    if (options.cursorId) {
+      queryOptions.cursor = { id: options.cursorId };
+      queryOptions.skip = 1;
+    } else if (options.skip !== undefined) {
+      queryOptions.skip = options.skip;
+    }
+
     const [notifications, total] = await Promise.all([
-      prisma.notification.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        skip: options.skip,
-        take: options.limit,
-      }),
+      prisma.notification.findMany(queryOptions),
       prisma.notification.count({ where }),
     ]);
 
@@ -61,7 +69,7 @@ export class NotificationRepository {
     });
   }
 
-  async createMany(data: Omit<Notification, 'id' | 'createdAt' | 'updatedAt' | 'readAt'>[]): Promise<number> {
+  async createMany(data: Omit<Notification, 'id' | 'createdAt' | 'updatedAt' | 'readAt' | 'deletedAt'>[]): Promise<number> {
     const result = await prisma.notification.createMany({
       data,
     });

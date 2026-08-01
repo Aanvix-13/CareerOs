@@ -122,9 +122,10 @@ export class ApplicationRepository {
       limit?: number;
       sort?: string;
       order?: 'asc' | 'desc';
+      cursorId?: string;
     }
   ): Promise<{ applications: Application[]; total: number }> {
-    const filters: Record<string, any> = { userId };
+    const filters: Record<string, any> = { userId, deletedAt: null };
     if (options.status) filters.currentStatus = options.status;
     if (options.jobType) filters.jobType = options.jobType;
     if (options.workMode) filters.workMode = options.workMode;
@@ -138,18 +139,26 @@ export class ApplicationRepository {
       order: options.order,
     });
 
-    const [applications, total] = await Promise.all([
-      prisma.application.findMany({
-        where,
-        orderBy,
-        skip: options.skip,
-        take: options.limit,
-        include: {
-          resume: {
-            select: { id: true, name: true },
-          },
+    const queryOptions: any = {
+      where,
+      orderBy,
+      take: options.limit,
+      include: {
+        resume: {
+          select: { id: true, name: true },
         },
-      }),
+      },
+    };
+
+    if (options.cursorId) {
+      queryOptions.cursor = { id: options.cursorId };
+      queryOptions.skip = 1;
+    } else if (options.skip !== undefined) {
+      queryOptions.skip = options.skip;
+    }
+
+    const [applications, total] = await Promise.all([
+      prisma.application.findMany(queryOptions),
       prisma.application.count({ where }),
     ]);
 

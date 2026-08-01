@@ -5,6 +5,8 @@ import { ValidationError } from '@/lib/errors';
 import { withAuth } from '@/middleware/auth.middleware';
 import { getPaginationParams, formatPaginatedResult } from '@/utils/pagination';
 
+import { withFeatureGate } from '@/middleware/subscription.middleware';
+
 export const GET = withAuth(async (request, user) => {
   try {
     const { searchParams } = new URL(request.url);
@@ -28,7 +30,7 @@ export const GET = withAuth(async (request, user) => {
   }
 });
 
-export const POST = withAuth(async (request, user) => {
+export const POST = withFeatureGate('RESUMES', async (request, user) => {
   try {
     const formData = await request.formData();
     

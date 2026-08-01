@@ -1,10 +1,21 @@
 import resumeRepository from '../repositories/resume.repository';
 import storageService from './storage.service';
 import { Resume } from '@prisma/client';
-import { ForbiddenError, NotFoundError, ValidationError } from '../lib/errors';
+import { ForbiddenError, NotFoundError, ValidationError, ConflictError } from '../lib/errors';
 import notificationService from './notification.service';
+import usageService from './usage.service';
 
 export class ResumeService {
+  private async signResume(resume: Resume): Promise<Resume> {
+    if (!resume) return resume;
+    const signedUrl = await storageService.generateSignedUrl(resume.fileUrl);
+    return { ...resume, fileUrl: signedUrl };
+  }
+
+  private async signResumes(resumes: Resume[]): Promise<Resume[]> {
+    return Promise.all(resumes.map((r) => this.signResume(r)));
+  }
+
   async uploadResume(
     userId: string,
     name: string,
@@ -13,14 +24,32 @@ export class ResumeService {
     notes: string | null,
     file: File
   ): Promise<Resume> {
-    // 1. Upload file
+    // 1. Check count limit first
+    const canUploadResume = await usageService.checkLimit(userId, 'RESUMES');
+    if (!canUploadResume) {
+      throw new ConflictError('Resume upload limit reached for your plan. Please upgrade to continue.');
+    }
+
+    // 2. Upload file
     const { fileUrl, fileSize } = await storageService.uploadResume(file, userId);
 
-    // 2. Count existing resumes to set first one as default automatically if no other default exists
+    // 3. Check storage limit
+    const currentStorage = await usageService.syncStorageUsage(userId);
+    const { limits } = await usageService.getUserPlanLimits(userId);
+    const storageLimit = limits['STORAGE'] ?? (100 * 1024 * 1024);
+
+    if (storageLimit !== -1 && (currentStorage + fileSize) > storageLimit) {
+      // Delete file and block creation
+      await storageService.deleteResume(fileUrl);
+      await notificationService.triggerLimitReached(userId, 'STORAGE', currentStorage + fileSize, storageLimit).catch(console.error);
+      throw new ConflictError('Storage quota exceeded. Please delete old files or upgrade your plan.');
+    }
+
+    // 4. Count existing resumes to set first one as default automatically if no other default exists
     const existingDefault = await resumeRepository.findDefaultByUserId(userId);
     const isDefault = !existingDefault;
 
-    // 3. Create resume record in database
+    // 5. Create resume record in database
     const resume = await resumeRepository.create({
       userId,
       name,
@@ -32,7 +61,11 @@ export class ResumeService {
       isDefault,
     });
 
-    // 4. Send notification
+    // 6. Update usage counters
+    await usageService.incrementUsage(userId, 'RESUMES');
+    await usageService.syncStorageUsage(userId);
+
+    // 7. Send notification
     await notificationService.createNotification({
       userId,
       type: 'Welcome', // Generic notice
@@ -42,7 +75,7 @@ export class ResumeService {
       relatedEntityId: resume.id,
     });
 
-    return resume;
+    return this.signResume(resume);
   }
 
   async updateResume(
@@ -58,7 +91,8 @@ export class ResumeService {
       throw new ForbiddenError();
     }
 
-    return resumeRepository.update(resumeId, data);
+    const updated = await resumeRepository.update(resumeId, data);
+    return this.signResume(updated);
   }
 
   async getResume(userId: string, resumeId: string): Promise<Resume> {
@@ -69,7 +103,7 @@ export class ResumeService {
     if (resume.userId !== userId) {
       throw new ForbiddenError();
     }
-    return resume;
+    return this.signResume(resume);
   }
 
   async listResumes(
@@ -77,7 +111,8 @@ export class ResumeService {
     options: { search?: string; skip?: number; limit?: number; sort?: string; order?: 'asc' | 'desc' }
   ): Promise<{ data: Resume[]; total: number }> {
     const { resumes, total } = await resumeRepository.findByUserId(userId, options);
-    return { data: resumes, total };
+    const signedData = await this.signResumes(resumes);
+    return { data: signedData, total };
   }
 
   async deleteResume(userId: string, resumeId: string): Promise<Resume> {
@@ -110,7 +145,13 @@ export class ResumeService {
     await storageService.deleteFile(resume.fileUrl);
 
     // 4. Delete DB entry
-    return resumeRepository.delete(resumeId);
+    const deleted = await resumeRepository.delete(resumeId);
+
+    // 5. Update usage counters
+    await usageService.decrementUsage(userId, 'RESUMES');
+    await usageService.syncStorageUsage(userId);
+
+    return this.signResume(deleted);
   }
 
   async setDefault(userId: string, resumeId: string): Promise<Resume> {
@@ -122,7 +163,8 @@ export class ResumeService {
       throw new ForbiddenError();
     }
 
-    return resumeRepository.setAsDefault(userId, resumeId);
+    const updated = await resumeRepository.setAsDefault(userId, resumeId);
+    return this.signResume(updated);
   }
 }
 
