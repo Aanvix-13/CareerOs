@@ -16,7 +16,7 @@ export function successResponse<T>(data: T, status = 200) {
 export function errorResponse(
   code: string,
   message: string,
-  details?: any,
+  details?: unknown,
   status = 400
 ) {
   return NextResponse.json(
@@ -32,18 +32,23 @@ export function errorResponse(
   );
 }
 
-export function handleApiError(error: any) {
+export function handleApiError(error: unknown) {
   if (error instanceof AppError) {
-    return errorResponse(error.code, error.message, (error as any).details, error.statusCode);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const details = (error as any).details;
+    return errorResponse(error.code, error.message, details, error.statusCode);
   }
 
   if (error instanceof ZodError) {
     return errorResponse('VALIDATION_ERROR', 'Invalid request body.', error.flatten().fieldErrors, 422);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const err = error as any;
+
   // Handle Prisma Unique Constraint Errors (P2002)
-  if (error.code === 'P2002' || error.message?.includes('Unique constraint failed')) {
-    const fields = error.meta?.target || ['email'];
+  if (err.code === 'P2002' || err.message?.includes('Unique constraint failed')) {
+    const fields = err.meta?.target || ['email'];
     const fieldName = fields[0] || 'field';
     // Capitalize field name
     const friendlyName = fieldName.charAt(0).toUpperCase() + fieldName.slice(1);
@@ -51,7 +56,7 @@ export function handleApiError(error: any) {
   }
 
   // Handle Prisma Record Not Found Errors (P2025)
-  if (error.code === 'P2025' || error.name === 'NotFoundError') {
+  if (err.code === 'P2025' || err.name === 'NotFoundError') {
     return errorResponse('NOT_FOUND', 'The requested record was not found.', null, 404);
   }
 

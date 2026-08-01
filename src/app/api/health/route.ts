@@ -31,8 +31,9 @@ export async function GET() {
         },
       }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Liveness probe failed:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     
     return NextResponse.json(
       {
@@ -43,7 +44,7 @@ export async function GET() {
         checks: {
           database: {
             status: 'down',
-            error: error.message || String(error),
+            error: errorMessage,
           },
         },
       },
